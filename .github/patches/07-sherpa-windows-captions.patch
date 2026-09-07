@@ -1,0 +1,311 @@
+diff --git a/engine/crates/concat-speech/src/transcribe.rs b/engine/crates/concat-speech/src/transcribe.rs
+index 2cd389c..faa46cd 100644
+--- a/engine/crates/concat-speech/src/transcribe.rs
++++ b/engine/crates/concat-speech/src/transcribe.rs
+@@ -28,6 +28,9 @@ use concat_media::{AudioDecoder, AudioOptions, SampleFormat};
+ use serde::{Deserialize, Serialize};
+ use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
+ 
++#[cfg(windows)]
++use sherpa_onnx::{OfflineRecognizer, OfflineRecognizerConfig, OfflineWhisperModelConfig};
++
+ use crate::DownloadProgress;
+ 
+ /// One downloadable Whisper model. Sizes are approximate, for progress bars
+@@ -178,6 +181,246 @@ pub struct TranscribeRequest {
+     pub model_id: String,
+ }
+ 
++
++#[cfg(windows)]
++const SHERPA_WHISPER_ID: &str = "sherpa-onnx-whisper-tiny";
++#[cfg(windows)]
++const SHERPA_WHISPER_ARCHIVE_ESTIMATE: u64 = 155_000_000;
++
++#[cfg(windows)]
++fn sherpa_whisper_dir(dirs: &AppDirs) -> Result<PathBuf, String> {
++    let dir = dirs.data.join("sherpa-whisper-models").join(SHERPA_WHISPER_ID);
++    Ok(dir)
++}
++
++#[cfg(windows)]
++fn sherpa_whisper_files(dirs: &AppDirs) -> Result<(PathBuf, PathBuf, PathBuf), String> {
++    let dir = sherpa_whisper_dir(dirs)?;
++    Ok((
++        dir.join("tiny-encoder.int8.onnx"),
++        dir.join("tiny-decoder.int8.onnx"),
++        dir.join("tiny-tokens.txt"),
++    ))
++}
++
++#[cfg(windows)]
++fn sherpa_whisper_ready(dirs: &AppDirs) -> bool {
++    sherpa_whisper_files(dirs)
++        .map(|(encoder, decoder, tokens)| {
++            encoder.metadata().map(|m| m.len() > 5_000_000).unwrap_or(false)
++                && decoder.metadata().map(|m| m.len() > 20_000_000).unwrap_or(false)
++                && tokens.metadata().map(|m| m.len() > 100_000).unwrap_or(false)
++        })
++        .unwrap_or(false)
++}
++
++/// Windows fallback backend for captions. The in-process whisper.cpp build can
++/// return its opaque `-6` encoder error on some PCs even with valid audio and
++/// models. sherpa-onnx is already shipped by Concat for TTS, and its Whisper
++/// ONNX backend is independent of whisper.cpp, so use it on Windows instead of
++/// retrying the same failing encoder over and over.
++#[cfg(windows)]
++fn ensure_sherpa_whisper_model(
++    dirs: &AppDirs,
++    cancel: &std::sync::atomic::AtomicBool,
++    mut report_percent: impl FnMut(i32),
++) -> Result<(), String> {
++    use std::sync::atomic::Ordering;
++
++    if sherpa_whisper_ready(dirs) {
++        return Ok(());
++    }
++
++    let parent = dirs.data.join("sherpa-whisper-models");
++    std::fs::create_dir_all(&parent)
++        .map_err(|error| format!("could not create {}: {error}", parent.display()))?;
++    let destination = parent.join(SHERPA_WHISPER_ID);
++    let archive = parent.join(format!("{SHERPA_WHISPER_ID}.tar.bz2.part"));
++    let staging = parent.join(format!(".staging-{SHERPA_WHISPER_ID}"));
++    let _ = std::fs::remove_file(&archive);
++    let _ = std::fs::remove_dir_all(&staging);
++
++    let url = format!(
++        "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/{SHERPA_WHISPER_ID}.tar.bz2"
++    );
++    let mut download_progress = |progress: DownloadProgress| {
++        let percent = if progress.total > 0 {
++            ((progress.received as f64 / progress.total as f64) * 20.0)
++                .round()
++                .clamp(0.0, 20.0) as i32
++        } else {
++            0
++        };
++        report_percent(percent);
++    };
++    crate::download_to(
++        &url,
++        &archive,
++        SHERPA_WHISPER_ID,
++        SHERPA_WHISPER_ARCHIVE_ESTIMATE,
++        cancel,
++        &mut download_progress,
++    )?;
++    if cancel.load(Ordering::Relaxed) {
++        let _ = std::fs::remove_file(&archive);
++        return Err("transcription cancelled".to_owned());
++    }
++
++    std::fs::create_dir_all(&staging)
++        .map_err(|error| format!("could not create {}: {error}", staging.display()))?;
++    report_percent(21);
++    let file = std::fs::File::open(&archive)
++        .map_err(|error| format!("could not reopen caption model: {error}"))?;
++    let decoder = bzip2::read::BzDecoder::new(std::io::BufReader::new(file));
++    let mut tar = tar::Archive::new(decoder);
++    for entry in tar
++        .entries()
++        .map_err(|error| format!("could not read caption model archive: {error}"))?
++    {
++        if cancel.load(Ordering::Relaxed) {
++            let _ = std::fs::remove_file(&archive);
++            let _ = std::fs::remove_dir_all(&staging);
++            return Err("transcription cancelled".to_owned());
++        }
++        entry
++            .and_then(|mut entry| entry.unpack_in(&staging))
++            .map_err(|error| format!("could not unpack caption model: {error}"))?;
++    }
++
++    let unpacked = staging.join(SHERPA_WHISPER_ID);
++    let required = [
++        unpacked.join("tiny-encoder.int8.onnx"),
++        unpacked.join("tiny-decoder.int8.onnx"),
++        unpacked.join("tiny-tokens.txt"),
++    ];
++    if !required.iter().all(|path| path.is_file()) {
++        let _ = std::fs::remove_file(&archive);
++        let _ = std::fs::remove_dir_all(&staging);
++        return Err("caption model archive was incomplete".to_owned());
++    }
++
++    // Keep only the three files used by the editor. The release archive also
++    // contains float32 copies and test WAVs which would otherwise waste disk.
++    let compact = staging.join("compact");
++    std::fs::create_dir_all(&compact)
++        .map_err(|error| format!("could not prepare caption model: {error}"))?;
++    for path in &required {
++        let name = path.file_name().ok_or_else(|| "invalid caption model path".to_owned())?;
++        std::fs::copy(path, compact.join(name))
++            .map_err(|error| format!("could not prepare caption model: {error}"))?;
++    }
++    let _ = std::fs::remove_dir_all(&destination);
++    std::fs::rename(&compact, &destination)
++        .map_err(|error| format!("could not finish caption model: {error}"))?;
++    let _ = std::fs::remove_file(&archive);
++    let _ = std::fs::remove_dir_all(&staging);
++    report_percent(25);
++
++    if !sherpa_whisper_ready(dirs) {
++        return Err("caption model could not be prepared".to_owned());
++    }
++    Ok(())
++}
++
++/// Turn recognizer prose into short on-screen phrases rather than one giant
++/// title. This is intentionally closer to social-video captioning: about 2-5
++/// words per card, with punctuation ending a card early.
++#[cfg(windows)]
++fn caption_phrases(text: &str) -> Vec<String> {
++    let mut out = Vec::new();
++    let mut current = Vec::new();
++    for word in text.split_whitespace() {
++        current.push(word);
++        let punctuation = word.ends_with('.')
++            || word.ends_with('!')
++            || word.ends_with('?')
++            || word.ends_with(',')
++            || word.ends_with(';')
++            || word.ends_with(':');
++        if current.len() >= 5 || (current.len() >= 2 && punctuation) {
++            out.push(current.join(" "));
++            current.clear();
++        }
++    }
++    if !current.is_empty() {
++        out.push(current.join(" "));
++    }
++    out
++}
++
++#[cfg(windows)]
++fn transcribe_with_sherpa(
++    dirs: &AppDirs,
++    request: &TranscribeRequest,
++    samples: &[f32],
++    cancel: &std::sync::atomic::AtomicBool,
++    mut progress: impl FnMut(i32),
++) -> Result<Vec<Segment>, String> {
++    use std::sync::atomic::Ordering;
++
++    ensure_sherpa_whisper_model(dirs, cancel, |percent| progress(percent))?;
++    if cancel.load(Ordering::Relaxed) {
++        return Err("transcription cancelled".to_owned());
++    }
++    let (encoder, decoder, tokens) = sherpa_whisper_files(dirs)?;
++    let mut config = OfflineRecognizerConfig::default();
++    let language = match request.language.as_str() {
++        "" | "auto" => "",
++        other => other,
++    };
++    config.model_config.whisper = OfflineWhisperModelConfig {
++        encoder: Some(encoder.to_string_lossy().into_owned()),
++        decoder: Some(decoder.to_string_lossy().into_owned()),
++        language: Some(language.to_owned()),
++        task: Some("transcribe".to_owned()),
++        tail_paddings: 0,
++        enable_token_timestamps: false,
++        enable_segment_timestamps: false,
++    };
++    config.model_config.tokens = Some(tokens.to_string_lossy().into_owned());
++    config.model_config.provider = Some("cpu".to_owned());
++    config.model_config.num_threads = 2;
++    config.decoding_method = Some("greedy_search".to_owned());
++
++    let recognizer = OfflineRecognizer::create(&config)
++        .ok_or_else(|| "could not start the Windows caption recognizer".to_owned())?;
++
++    const RATE: usize = 16_000;
++    const CHUNK_SECONDS: usize = 8;
++    const CHUNK_SAMPLES: usize = RATE * CHUNK_SECONDS;
++    let total_chunks = samples.len().div_ceil(CHUNK_SAMPLES).max(1);
++    let mut segments = Vec::new();
++
++    for (index, chunk) in samples.chunks(CHUNK_SAMPLES).enumerate() {
++        if cancel.load(Ordering::Relaxed) {
++            return Err("transcription cancelled".to_owned());
++        }
++        let stream = recognizer.create_stream();
++        stream.accept_waveform(RATE as i32, chunk);
++        recognizer.decode(&stream);
++        if let Some(result) = stream.get_result() {
++            let phrases = caption_phrases(result.text.trim());
++            if !phrases.is_empty() {
++                let chunk_start = (index * CHUNK_SAMPLES) as f64 / RATE as f64;
++                let chunk_duration = chunk.len() as f64 / RATE as f64;
++                let each = (chunk_duration / phrases.len() as f64).max(0.35);
++                for (phrase_index, text) in phrases.into_iter().enumerate() {
++                    let start = chunk_start + phrase_index as f64 * each;
++                    let end = (start + each).min(chunk_start + chunk_duration);
++                    if let Some(segment) = keep_segment(start, end, text) {
++                        segments.push(segment);
++                    }
++                }
++            }
++        }
++        let done = index + 1;
++        let percent = 25 + ((done as f64 / total_chunks as f64) * 75.0).round() as i32;
++        progress(percent.clamp(25, 100));
++    }
++    progress(100);
++    Ok(segments)
++}
++
+ struct LoadedModel {
+     id: String,
+     context: WhisperContext,
+@@ -309,13 +552,6 @@ impl Transcriber {
+         let job = self.gate.begin("transcription")?;
+         let cancel = job.cancel_handle();
+ 
+-        let model_path = model_file(dirs, &request.model_id)?;
+-        if !model_path.is_file() {
+-            return Err(format!(
+-                "model {} is not downloaded - see Settings > Transcriber",
+-                request.model_id
+-            ));
+-        }
+         // NaN is refused along with zero and negative windows.
+         if request.window.is_nan() || request.window <= 0.0 {
+             return Err("nothing to transcribe: the clip covers no time".to_owned());
+@@ -352,6 +588,24 @@ impl Transcriber {
+             return Err("transcription cancelled".to_owned());
+         }
+ 
++        // Do not use whisper.cpp on Windows. A subset of Windows machines
++        // consistently returns GenericError(-6) from its encoder even when
++        // the same model and audio are valid. Concat already ships the
++        // sherpa-onnx runtime for TTS, so the Windows caption path uses its
++        // independent Whisper ONNX implementation instead.
++        #[cfg(windows)]
++        {
++            return transcribe_with_sherpa(dirs, request, &samples, cancel.as_ref(), progress);
++        }
++
++        let model_path = model_file(dirs, &request.model_id)?;
++        if !model_path.is_file() {
++            return Err(format!(
++                "model {} is not downloaded - see Settings > Transcriber",
++                request.model_id
++            ));
++        }
++
+         let mut loaded = self
+             .model
+             .lock()
+@@ -428,10 +682,6 @@ impl Transcriber {
+                 params.set_print_timestamps(false);
+                 params.set_suppress_blank(true);
+                 params.set_no_context(true);
+-                // A smaller audio context partially evaluates the encoder and
+-                // lowers memory/compute pressure. 768 is also used by
+-                // whisper.cpp's streaming example for this purpose.
+-                params.set_audio_ctx(768);
+                 let abort = Arc::clone(&cancel);
+                 params.set_abort_callback_safe(move || abort.load(Ordering::Relaxed));
+ 
