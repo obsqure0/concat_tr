@@ -1,0 +1,14 @@
+diff --git a/engine/crates/concat/ui/app.slint b/engine/crates/concat/ui/app.slint
+index 1dbab9f..9427fb1 100644
+--- a/engine/crates/concat/ui/app.slint
++++ b/engine/crates/concat/ui/app.slint
+@@ -306,6 +306,9 @@ export component App inherits Window {
+                     return accept;
+                 }
+                 if (event.text == "-") { Editor.shortcut("zoom-out"); return accept; }
++                // Ctrl+0 returns the timeline to its comfortable default
++                // scale without moving the playhead away from the same x.
++                if (event.text == "0") { Editor.shortcut("zoom-reset"); return accept; }
+                 return reject;
+             }
+             if (event.modifiers.alt) {
