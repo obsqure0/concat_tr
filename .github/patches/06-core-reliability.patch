@@ -1,0 +1,339 @@
+diff --git a/engine/crates/concat-host/src/titles.rs b/engine/crates/concat-host/src/titles.rs
+index 3c7bd67..2450849 100644
+--- a/engine/crates/concat-host/src/titles.rs
++++ b/engine/crates/concat-host/src/titles.rs
+@@ -73,6 +73,7 @@ impl Titles {
+     pub fn clips(&self, project: &Project, width: u32, height: u32) -> Vec<TitleClip> {
+         let timeline = project.active();
+         let mut out = Vec::new();
++        let mut title_order = 0usize;
+         for clip in &timeline.clips {
+             if clip.kind != ModelClipKind::Text {
+                 continue;
+@@ -101,7 +102,12 @@ impl Titles {
+                     start: clip.start,
+                     duration: clip.duration,
+                     source_start: 0.0,
+-                    track: index,
++                    // Text is an overlay in an editor, not background
++                    // media. A new title currently lands on Track 1 while a
++                    // video may be on Track 4, which made the title's transform
++                    // handles visible but its pixels sit behind the video.
++                    // Composite every title above every media lane instead.
++                    track: timeline.tracks.len() + title_order,
+                     hidden: !track.visible,
+                     muted: true,
+                     volume: 0.0,
+@@ -139,6 +145,7 @@ impl Titles {
+                 },
+                 block,
+             });
++            title_order += 1;
+         }
+         out
+     }
+diff --git a/engine/crates/concat-speech/src/transcribe.rs b/engine/crates/concat-speech/src/transcribe.rs
+index 0f80d1c..2cd389c 100644
+--- a/engine/crates/concat-speech/src/transcribe.rs
++++ b/engine/crates/concat-speech/src/transcribe.rs
+@@ -113,6 +113,15 @@ fn model_file(dirs: &AppDirs, id: &str) -> Result<PathBuf, String> {
+     Ok(models_dir(dirs)?.join(format!("ggml-{id}.bin")))
+ }
+ 
++/// A model file has to be close to the published size, not merely exist. A
++/// truncated file from an interrupted older download can otherwise survive
++/// forever and fail later inside whisper's encoder with an opaque error.
++fn model_file_looks_complete(path: &std::path::Path, expected: u64) -> bool {
++    path.metadata()
++        .map(|meta| meta.is_file() && meta.len() >= expected.saturating_mul(85) / 100)
++        .unwrap_or(false)
++}
++
+ /// One model, as the settings panel shows it.
+ #[derive(Serialize, Clone, Debug)]
+ #[serde(rename_all = "camelCase")]
+@@ -213,7 +222,10 @@ impl Transcriber {
+                     blurb: model.blurb.to_owned(),
+                     english_only: model.english_only,
+                     size_bytes: model.approx_bytes,
+-                    downloaded: dir.join(format!("ggml-{}.bin", model.id)).is_file(),
++                    downloaded: model_file_looks_complete(
++                        &dir.join(format!("ggml-{}.bin", model.id)),
++                        model.approx_bytes,
++                    ),
+                 })
+                 .collect(),
+         })
+@@ -233,10 +245,15 @@ impl Transcriber {
+     ) -> Result<(), String> {
+         let job = self.downloads.begin("model download")?;
+         let destination = model_file(dirs, id)?;
+-        if destination.is_file() {
++        let estimate = known(id).map(|model| model.approx_bytes).unwrap_or(0);
++        if model_file_looks_complete(&destination, estimate) {
+             return Ok(());
+         }
+-        let estimate = known(id).map(|model| model.approx_bytes).unwrap_or(0);
++        // A short/corrupt file is not a downloaded model. Remove it so the
++        // atomic .part -> final download below can repair it automatically.
++        if destination.exists() {
++            let _ = std::fs::remove_file(&destination);
++        }
+         let partial = destination.with_extension("bin.part");
+         let (received, total) = crate::download_to(
+             &model_url(id),
+@@ -317,7 +334,17 @@ impl Transcriber {
+             },
+         )
+         .map_err(|error| error.to_string())?;
+-        let samples = decoder.collect_f32().map_err(|error| error.to_string())?;
++        let mut samples = decoder.collect_f32().map_err(|error| error.to_string())?;
++        // Bad media occasionally decodes a NaN/Inf transient. One non-finite
++        // sample can poison the mel/encoder math, so make the stream finite
++        // before handing it to whisper.cpp.
++        for sample in &mut samples {
++            *sample = if sample.is_finite() {
++                sample.clamp(-1.0, 1.0)
++            } else {
++                0.0
++            };
++        }
+         if samples.is_empty() {
+             return Err("nothing to transcribe: the clip has no audio".to_owned());
+         }
+@@ -331,9 +358,16 @@ impl Transcriber {
+             .map_err(|_| "transcriber state poisoned".to_owned())?;
+         if loaded.as_ref().map(|model| model.id.as_str()) != Some(request.model_id.as_str()) {
+             // Load before overwriting: a failed load keeps the old model.
+-            let context =
+-                WhisperContext::new_with_params(&model_path, WhisperContextParameters::default())
+-                    .map_err(|error| format!("could not load the model: {error}"))?;
++            let mut context_params = WhisperContextParameters::default();
++            // The Windows build is distributed to unknown GPUs/drivers. Keep
++            // captions on whisper's portable CPU backend there; the editor's
++            // preview GPU remains unaffected. This avoids backend-specific
++            // encoder failures on otherwise valid audio/model files.
++            if cfg!(windows) {
++                context_params.use_gpu(false);
++            }
++            let context = WhisperContext::new_with_params(&model_path, context_params)
++                .map_err(|error| format!("could not load the model: {error}"))?;
+             *loaded = Some(LoadedModel {
+                 id: request.model_id.clone(),
+                 context,
+@@ -348,12 +382,18 @@ impl Transcriber {
+         // friendly and gives us a useful retry point. A failed window is tried
+         // once more with a single worker thread before we give up.
+         const WHISPER_RATE: usize = 16_000;
+-        const CHUNK_SECONDS: usize = 28;
++        const CHUNK_SECONDS: usize = 15;
+         const CHUNK_SAMPLES: usize = WHISPER_RATE * CHUNK_SECONDS;
+-        let threads = std::thread::available_parallelism()
+-            .map(|count| count.get().min(4))
+-            .unwrap_or(2)
+-            .max(1);
++        let threads = if cfg!(windows) {
++            // Reliability over peak speed for the broad Windows binary. The
++            // lighter Tiny fallback keeps this usable even on modest CPUs.
++            1
++        } else {
++            std::thread::available_parallelism()
++                .map(|count| count.get().min(4))
++                .unwrap_or(2)
++                .max(1)
++        };
+         let progress = Arc::new(Mutex::new(progress));
+         let total_samples = samples.len().max(1);
+         let mut all_segments = Vec::new();
+@@ -387,6 +427,11 @@ impl Transcriber {
+                 params.set_print_realtime(false);
+                 params.set_print_timestamps(false);
+                 params.set_suppress_blank(true);
++                params.set_no_context(true);
++                // A smaller audio context partially evaluates the encoder and
++                // lowers memory/compute pressure. 768 is also used by
++                // whisper.cpp's streaming example for this purpose.
++                params.set_audio_ctx(768);
+                 let abort = Arc::clone(&cancel);
+                 params.set_abort_callback_safe(move || abort.load(Ordering::Relaxed));
+ 
+diff --git a/engine/crates/concat/locales/en.json b/engine/crates/concat/locales/en.json
+index 6c499ad..685e367 100644
+--- a/engine/crates/concat/locales/en.json
++++ b/engine/crates/concat/locales/en.json
+@@ -521,5 +521,7 @@
+   "unsaved changes": "unsaved changes",
+   "{0} clips": "{0} clips",
+   "{0} clips · {1} titles": "{0} clips · {1} titles",
+-  "Could not create the export folder: {0}": "Could not create the export folder: {0}"
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "The larger model failed on this PC; retrying with Tiny": "The larger model failed on this PC; retrying with Tiny",
++  "Preparing a lighter caption model for this PC": "Preparing a lighter caption model for this PC"
+ }
+diff --git a/engine/crates/concat/locales/tr.json b/engine/crates/concat/locales/tr.json
+index 2d1b9eb..5a11c2d 100644
+--- a/engine/crates/concat/locales/tr.json
++++ b/engine/crates/concat/locales/tr.json
+@@ -521,5 +521,7 @@
+   "unsaved changes": "kaydedilmemiş değişiklikler",
+   "{0} clips": "{0} klip",
+   "{0} clips · {1} titles": "{0} klip · {1} metin",
+-  "Could not create the export folder: {0}": "Dışa aktarma klasörü oluşturulamadı: {0}"
++  "Could not create the export folder: {0}": "Dışa aktarma klasörü oluşturulamadı: {0}",
++  "The larger model failed on this PC; retrying with Tiny": "Bu bilgisayarda büyük model çalışmadı; Tiny ile tekrar deneniyor",
++  "Preparing a lighter caption model for this PC": "Bu bilgisayar için daha hafif altyazı modeli hazırlanıyor"
+ }
+diff --git a/engine/crates/concat/src/studio.rs b/engine/crates/concat/src/studio.rs
+index 24bc14f..af620a6 100644
+--- a/engine/crates/concat/src/studio.rs
++++ b/engine/crates/concat/src/studio.rs
+@@ -252,6 +252,16 @@ fn home_folder(name: &str) -> String {
+             let drive = std::env::var_os("HOMEDRIVE")?;
+             let path = std::env::var_os("HOMEPATH")?;
+             Some(PathBuf::from(drive).join(path))
++        })
++        .or_else(|| {
++            // Concat itself requires APPDATA on Windows, so this is the most
++            // reliable last-resort way to recover C:\Users\<name> in GUI
++            // launches where USERPROFILE/HOME are unexpectedly absent.
++            if !cfg!(windows) {
++                return None;
++            }
++            let roaming = std::env::var_os("APPDATA").map(PathBuf::from)?;
++            roaming.parent()?.parent().map(Path::to_path_buf)
+         });
+ 
+     let folder = if cfg!(target_os = "windows") && name == "Movies" {
+@@ -2687,6 +2697,10 @@ impl Studio {
+             ClipTextField::FontFamily => text.font_family = value.to_owned(),
+             _ => {}
+         }
++        // The inspector's text field now emits on every keystroke. Echo lanes
++        // alone update the timeline data, not the rendered monitor, so ask for
++        // a fresh frame as well. The commit on blur still keeps this one undo.
++        self.request_preview();
+     }
+ 
+     pub fn clip_set_colour(&mut self, field: ClipTextField, value: slint::Color) {
+@@ -4022,10 +4036,13 @@ impl Studio {
+             folder = home_folder("Movies");
+         }
+         if folder.is_empty() {
+-            folder = std::env::current_dir()
+-                .ok()
+-                .map(|path| path.to_string_lossy().into_owned())
+-                .unwrap_or_else(|| ".".to_owned());
++            // A project folder is already known to be writable (autosave uses
++            // it), so never fall through to the drive root. Keeping exports in
++            // a child folder is also a useful portable-build fallback.
++            folder = PathBuf::from(session.path())
++                .join("Exports")
++                .to_string_lossy()
++                .into_owned();
+         }
+         let folder_path = PathBuf::from(&folder);
+         if let Err(error) = std::fs::create_dir_all(&folder_path) {
+@@ -4421,27 +4438,28 @@ impl Studio {
+             // tutorial. Fetch the multilingual Base Whisper model and carry
+             // straight on into transcription when it arrives. It is free and
+             // runs locally after the one-time download.
+-            const DEFAULT_CAPTION_MODEL: &str = "base";
++            let default_caption_model = if cfg!(windows) { "tiny" } else { "base" };
+             if !self
+                 .transcribers
+                 .iter()
+-                .any(|model| model.id == DEFAULT_CAPTION_MODEL)
++                .any(|model| model.id == default_caption_model)
+             {
+                 self.captions.message =
+                     t("No multilingual caption model is available in this build");
+                 return;
+             }
+-            self.captions.waiting_model = Some(DEFAULT_CAPTION_MODEL.to_owned());
++            self.captions.waiting_model = Some(default_caption_model.to_owned());
+             self.captions.running = true;
+             self.captions.preparing = true;
+             self.captions.progress = 0.0;
+             self.captions.message.clear();
+-            self.model_download(DEFAULT_CAPTION_MODEL);
++            self.model_download(default_caption_model);
+             return;
+         };
+         self.captions.model = model_index;
+         let offset_y = CAPTION_OFFSETS[self.captions.placement.min(2)];
+         let font_size = CAPTION_SIZES[self.captions.size.min(2)];
++        let attempted_model = model.clone();
+         let request = concat_speech::transcribe::TranscribeRequest {
+             path: media.path.clone(),
+             source_start: clip.source_start,
+@@ -4504,7 +4522,42 @@ impl Studio {
+                     }
+                     // Asked for: the sheet is already on its way down.
+                     Err(error) if error.contains("cancel") => studio.captions.open = false,
+-                    Err(error) => studio.captions.message = error,
++                    Err(error) => {
++                        let lower = error.to_ascii_lowercase();
++                        let encoder_failure = error.contains("-6")
++                            || lower.contains("encode")
++                            || lower.contains("generic whisper error");
++                        // whisper.cpp's -6 is an encoder/backend failure. On
++                        // Windows, automatically fall back once to the much
++                        // lighter multilingual Tiny model instead of asking
++                        // the editor to understand backend error codes.
++                        if cfg!(windows) && encoder_failure && attempted_model != "tiny" {
++                            let tiny_exists = studio.transcribers.iter().any(|m| m.id == "tiny");
++                            if tiny_exists {
++                                let installed = Self::installed(&studio.transcribers);
++                                if let Some(index) = installed.iter().position(|m| m.id == "tiny") {
++                                    studio.captions.model = index;
++                                    studio.captions.message = t(
++                                        "The larger model failed on this PC; retrying with Tiny",
++                                    );
++                                    studio.captions_run();
++                                } else {
++                                    studio.captions.waiting_model = Some("tiny".to_owned());
++                                    studio.captions.running = true;
++                                    studio.captions.preparing = true;
++                                    studio.captions.progress = 0.0;
++                                    studio.captions.message = t(
++                                        "Preparing a lighter caption model for this PC",
++                                    );
++                                    studio.model_download("tiny");
++                                }
++                            } else {
++                                studio.captions.message = error;
++                            }
++                        } else {
++                            studio.captions.message = error;
++                        }
++                    }
+                 }
+             },
+         );
+diff --git a/engine/crates/concat/ui/app.slint b/engine/crates/concat/ui/app.slint
+index 9427fb1..79abb35 100644
+--- a/engine/crates/concat/ui/app.slint
++++ b/engine/crates/concat/ui/app.slint
+@@ -266,6 +266,11 @@ export component App inherits Window {
+             enabled: !root.on-start;
+             activated => { root.app-menu-selected("redo"); }
+         }
++        KeyBinding {
++            keys: @keys(Control + Digit0);
++            enabled: !root.on-start;
++            activated => { Editor.shortcut("zoom-reset"); }
++        }
+ 
+         // The rest of the keyboard, the way CapCut lays it out: the chord
+         // key with a letter for an edit, a bare letter for a tool, the
+@@ -291,6 +296,10 @@ export component App inherits Window {
+                         Editor.shortcut("zoom-in");
+                         return accept;
+                     }
++                    if (event.text == "0" || event.text == ")") {
++                        Editor.shortcut("zoom-reset");
++                        return accept;
++                    }
+                     return reject;
+                 }
+                 if (event.text == "b") { Editor.shortcut("split"); return accept; }
