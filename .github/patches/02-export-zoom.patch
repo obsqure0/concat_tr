@@ -1,0 +1,191 @@
+diff --git a/engine/crates/concat/src/studio.rs b/engine/crates/concat/src/studio.rs
+index 9c4ccac..24bc14f 100644
+--- a/engine/crates/concat/src/studio.rs
++++ b/engine/crates/concat/src/studio.rs
+@@ -20,6 +20,7 @@
+ 
+ use std::cell::RefCell;
+ use std::collections::{HashMap, HashSet};
++use std::path::{Path, PathBuf};
+ use std::rc::Rc;
+ use std::sync::Arc;
+ 
+@@ -232,14 +233,80 @@ impl Default for ExportState {
+     }
+ }
+ 
+-/// `name` under the home directory, as a path string; empty when there is
+-/// no home to speak of, and the form then asks for a folder outright.
++/// `name` under the user's home directory, as a path string.
++///
++/// Windows normally does not define HOME for GUI applications, so using it
++/// alone leaves the export folder empty and turns `name.mp4` into `/name.mp4`
++/// (the root of the current drive), which standard users cannot write. Prefer
++/// USERPROFILE there and keep HOME as the portable fallback.
+ fn home_folder(name: &str) -> String {
+-    std::env::var("HOME")
+-        .map(|home| format!("{home}/{name}"))
++    let home = std::env::var_os("USERPROFILE")
++        .filter(|value| !value.is_empty())
++        .map(PathBuf::from)
++        .or_else(|| {
++            std::env::var_os("HOME")
++                .filter(|value| !value.is_empty())
++                .map(PathBuf::from)
++        })
++        .or_else(|| {
++            let drive = std::env::var_os("HOMEDRIVE")?;
++            let path = std::env::var_os("HOMEPATH")?;
++            Some(PathBuf::from(drive).join(path))
++        });
++
++    let folder = if cfg!(target_os = "windows") && name == "Movies" {
++        // Explorer calls this known folder "Videos" even on translated
++        // Windows installations; the display name is localised separately.
++        "Videos"
++    } else {
++        name
++    };
++    home.map(|home| home.join(folder).to_string_lossy().into_owned())
+         .unwrap_or_default()
+ }
+ 
++/// A file-system safe export stem. The same conservative set works on every
++/// desktop and avoids Windows' reserved path punctuation in project names.
++fn export_stem(raw: &str) -> String {
++    let raw = raw.trim();
++    let raw = raw
++        .strip_suffix(".mp4")
++        .or_else(|| raw.strip_suffix(".MP4"))
++        .unwrap_or(raw);
++    let mut out: String = raw
++        .chars()
++        .map(|ch| {
++            if ch.is_control() || matches!(ch, '<' | '>' | ':' | '"' | '/' | '\\' | '|' | '?' | '*') {
++                '_'
++            } else {
++                ch
++            }
++        })
++        .collect();
++    out = out.trim().trim_matches('.').trim().to_owned();
++    if out.is_empty() {
++        t("Untitled")
++    } else {
++        out
++    }
++}
++
++/// CapCut-style "do not destroy the previous render" naming. If the chosen
++/// name is already there, use `name (2).mp4`, `name (3).mp4`, and so on.
++fn available_export_path(folder: &Path, stem: &str) -> PathBuf {
++    let first = folder.join(format!("{stem}.mp4"));
++    if !first.exists() {
++        return first;
++    }
++    for number in 2..10_000 {
++        let candidate = folder.join(format!("{stem} ({number}).mp4"));
++        if !candidate.exists() {
++            return candidate;
++        }
++    }
++    first
++}
++
+ /// The settings sheet's state.
+ #[derive(Default)]
+ pub struct SettingsState {
+@@ -3946,6 +4013,32 @@ impl Studio {
+             self.export.message = t("There is nothing on the timeline to export");
+             return;
+         }
++
++        // Resolve and create the destination before claiming the exporter.
++        // In particular this repairs the empty-folder case on Windows where
++        // HOME is absent and the old code tried to write to `/file.mp4`.
++        let mut folder = self.export.folder.trim().to_owned();
++        if folder.is_empty() {
++            folder = home_folder("Movies");
++        }
++        if folder.is_empty() {
++            folder = std::env::current_dir()
++                .ok()
++                .map(|path| path.to_string_lossy().into_owned())
++                .unwrap_or_else(|| ".".to_owned());
++        }
++        let folder_path = PathBuf::from(&folder);
++        if let Err(error) = std::fs::create_dir_all(&folder_path) {
++            self.export.phase = ExportPhase::Failed;
++            self.export.message = tf("Could not create the export folder: {0}", &[&error]);
++            return;
++        }
++        let stem = export_stem(&self.export.name);
++        let output_path = available_export_path(&folder_path, &stem);
++        let output = output_path.to_string_lossy().into_owned();
++        self.export.folder = folder_path.to_string_lossy().into_owned();
++        self.export.name = stem;
++
+         let job = match self.host.exporter.begin() {
+             Ok(job) => job,
+             Err(error) => {
+@@ -3954,11 +4047,6 @@ impl Studio {
+                 return;
+             }
+         };
+-        let output = format!(
+-            "{}/{}.mp4",
+-            self.export.folder.trim_end_matches('/'),
+-            self.export.name.trim()
+-        );
+         let spec = ExportSpec {
+             output: output.clone(),
+             crf: EXPORT_CRF[self.export.quality.min(2)],
+@@ -5303,24 +5391,29 @@ impl Studio {
+             .iter()
+             .filter(|clip| clip.kind == model::ClipKind::Text)
+             .count();
++        let display_folder = if self.export.folder.trim().is_empty() {
++            home_folder("Movies")
++        } else {
++            self.export.folder.trim().to_owned()
++        };
++        let display_name = export_stem(&self.export.name);
++        let display_path = PathBuf::from(display_folder)
++            .join(format!("{display_name}.mp4"))
++            .to_string_lossy()
++            .into_owned();
+         ExportData {
+             open: self.export.open,
+             name: self.export.name.as_str().into(),
+-            path: format!(
+-                "{}/{}.mp4",
+-                self.export.folder.trim_end_matches('/'),
+-                self.export.name
+-            )
+-            .into(),
++            path: display_path.into(),
+             format: format!("{width} × {height} · {rate:.2} fps").into(),
+             duration: {
+                 let whole = self.duration().max(0.0) as i32;
+                 format!("{}:{:02}", whole / 60, whole % 60).into()
+             },
+             contents: if titles > 0 {
+-                format!("{clips} clips · {titles} titles")
++                tf("{0} clips · {1} titles", &[&clips, &titles])
+             } else {
+-                format!("{clips} clips")
++                tf("{0} clips", &[&clips])
+             }
+             .into(),
+             resolution: self.export.resolution as i32,
+@@ -5763,6 +5856,10 @@ impl Studio {
+                     }
+                 }
+             }
++            "zoom-reset" => {
++                let before = self.seconds_per_pixel.max(0.000_5);
++                self.zoom_timeline(0.05 / before, self.playhead);
++            }
+             "tool-select" => self.tool = TimelineTool::Select,
+             // B toggles: pressing it with the razor up puts the pointer back.
+             "tool-razor" => {
