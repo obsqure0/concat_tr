@@ -1,0 +1,88 @@
+name: Build Windows TR
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  FFMPEG_RELEASE: https://github.com/BtbN/FFmpeg-Builds/releases/download/latest
+  FFMPEG_VERSION: 8.1
+  GGML_NATIVE: "OFF"
+
+jobs:
+  windows-x86_64:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' engine/Cargo.toml | head -1)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: LLVM and FFmpeg
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          choco install llvm -y --no-progress
+          "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          "LIBCLANG_PATH=C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+          $url = "$env:FFMPEG_RELEASE/ffmpeg-n$env:FFMPEG_VERSION-latest-win64-gpl-shared-$env:FFMPEG_VERSION.zip"
+          curl.exe -fsSL --retry 5 --retry-all-errors -o ffmpeg-win.zip "$url"
+          Expand-Archive ffmpeg-win.zip -DestinationPath ffdl
+          $dir = (Get-ChildItem ffdl -Directory | Select-Object -First 1).FullName
+          "FFMPEG_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "$dir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: sherpa-onnx runtime
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = (Select-String -Path engine\Cargo.lock -Pattern 'name = "sherpa-onnx-sys"' -Context 0,1).Context.PostContext[0] -replace '.*"(.*)".*', '$1'
+          $stem = "sherpa-onnx-v$version-win-x64-shared-MT-Release-lib"
+          curl.exe -fsSL --retry 5 --retry-all-errors -o sherpa.tar.bz2 "https://github.com/k2-fsa/sherpa-onnx/releases/download/v$version/$stem.tar.bz2"
+          python -c "import tarfile; t = tarfile.open('sherpa.tar.bz2'); t.extractall(**({'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}))"
+          if (-not (Test-Path "$stem\lib")) { throw "$stem\lib is missing" }
+          New-Item -ItemType Directory -Force sherpa-libs, sherpa-dlls | Out-Null
+          Copy-Item "$stem\lib\*.lib" sherpa-libs\
+          Copy-Item "$stem\lib\*.dll" sherpa-dlls\
+          "SHERPA_ONNX_LIB_DIR=$PWD\sherpa-libs" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "SHERPA_DLL_DIR=$PWD\sherpa-dlls" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+          key: windows-tr-x86_64
+          env-vars: CARGO CC CFLAGS CXX CMAKE RUST GGML
+
+      - name: Build
+        shell: bash
+        working-directory: engine
+        run: |
+          set -o pipefail
+          cargo build --profile app -p concat --target x86_64-pc-windows-msvc 2>&1 | tee build.log
+
+      - name: Package
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $name = "Concat-$env:VERSION-TR-windows-x86_64"
+          New-Item -ItemType Directory -Force "stage\$name" | Out-Null
+          Copy-Item "engine\target\x86_64-pc-windows-msvc\app\concat.exe" "stage\$name\"
+          Copy-Item "$env:FFMPEG_DIR\bin\*.dll" "stage\$name\"
+          Copy-Item "$env:SHERPA_DLL_DIR\*.dll" "stage\$name\"
+          Copy-Item LICENSE, THIRD_PARTY_NOTICES.md "stage\$name\"
+          Compress-Archive -Path "stage\$name" -DestinationPath "stage\$name.zip"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Concat-TR-windows-x86_64
+          path: stage/*.zip
+          if-no-files-found: error
