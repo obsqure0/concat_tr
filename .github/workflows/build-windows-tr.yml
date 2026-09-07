@@ -2,6 +2,11 @@ name: Build Windows TR
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Concat-0.2.1-TR-kaynak.zip'
+      - '.github/workflows/build-windows-tr.yml'
 
 env:
   CARGO_TERM_COLOR: always
@@ -17,12 +22,30 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
 
+      - name: Extract source
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (-not (Test-Path "Concat-0.2.1-TR-kaynak.zip")) {
+            throw "Concat-0.2.1-TR-kaynak.zip not found in repository root"
+          }
+          Remove-Item -Recurse -Force source -ErrorAction SilentlyContinue
+          Expand-Archive -LiteralPath "Concat-0.2.1-TR-kaynak.zip" -DestinationPath source -Force
+          if (-not (Test-Path "source\concat_tr\engine\Cargo.toml")) {
+            throw "source\concat_tr\engine\Cargo.toml not found after extraction"
+          }
+          Write-Host "Source extracted successfully"
+
       - name: Read version
         id: version
-        shell: bash
+        shell: pwsh
         run: |
-          version=$(sed -n 's/^version = "\(.*\)"/\1/p' engine/Cargo.toml | head -1)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          $ErrorActionPreference = "Stop"
+          $match = Select-String -Path "source\concat_tr\engine\Cargo.toml" -Pattern '^version = "(.+)"' | Select-Object -First 1
+          if (-not $match) { throw "Version not found in Cargo.toml" }
+          $version = $match.Matches[0].Groups[1].Value
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "Building Concat $version"
 
       - name: LLVM and FFmpeg
         shell: pwsh
@@ -33,9 +56,11 @@ jobs:
           "LIBCLANG_PATH=C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_ENV -Append
 
           $url = "$env:FFMPEG_RELEASE/ffmpeg-n$env:FFMPEG_VERSION-latest-win64-gpl-shared-$env:FFMPEG_VERSION.zip"
+          Write-Host "Downloading $url"
           curl.exe -fsSL --retry 5 --retry-all-errors -o ffmpeg-win.zip "$url"
-          Expand-Archive ffmpeg-win.zip -DestinationPath ffdl
+          Expand-Archive ffmpeg-win.zip -DestinationPath ffdl -Force
           $dir = (Get-ChildItem ffdl -Directory | Select-Object -First 1).FullName
+          if (-not $dir) { throw "FFmpeg archive did not contain a top-level directory" }
           "FFMPEG_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Append
           "$dir\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
@@ -43,8 +68,11 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $version = (Select-String -Path engine\Cargo.lock -Pattern 'name = "sherpa-onnx-sys"' -Context 0,1).Context.PostContext[0] -replace '.*"(.*)".*', '$1'
+          $lock = "source\concat_tr\engine\Cargo.lock"
+          $version = (Select-String -Path $lock -Pattern 'name = "sherpa-onnx-sys"' -Context 0,1).Context.PostContext[0] -replace '.*"(.*)".*', '$1'
+          if (-not $version) { throw "sherpa-onnx-sys version not found in Cargo.lock" }
           $stem = "sherpa-onnx-v$version-win-x64-shared-MT-Release-lib"
+          Write-Host "Downloading $stem"
           curl.exe -fsSL --retry 5 --retry-all-errors -o sherpa.tar.bz2 "https://github.com/k2-fsa/sherpa-onnx/releases/download/v$version/$stem.tar.bz2"
           python -c "import tarfile; t = tarfile.open('sherpa.tar.bz2'); t.extractall(**({'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}))"
           if (-not (Test-Path "$stem\lib")) { throw "$stem\lib is missing" }
@@ -56,16 +84,29 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: engine
+          workspaces: source/concat_tr/engine
           key: windows-tr-x86_64
           env-vars: CARGO CC CFLAGS CXX CMAKE RUST GGML
 
       - name: Build
         shell: bash
-        working-directory: engine
+        working-directory: source/concat_tr/engine
         run: |
           set -o pipefail
           cargo build --profile app -p concat --target x86_64-pc-windows-msvc 2>&1 | tee build.log
+
+      - name: Build log to summary
+        if: failure()
+        shell: bash
+        run: |
+          if [ -f source/concat_tr/engine/build.log ]; then
+            {
+              echo '### Build failed'
+              echo '```'
+              tail -n 150 source/concat_tr/engine/build.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Package
         shell: pwsh
@@ -75,11 +116,12 @@ jobs:
           $ErrorActionPreference = "Stop"
           $name = "Concat-$env:VERSION-TR-windows-x86_64"
           New-Item -ItemType Directory -Force "stage\$name" | Out-Null
-          Copy-Item "engine\target\x86_64-pc-windows-msvc\app\concat.exe" "stage\$name\"
+          Copy-Item "source\concat_tr\engine\target\x86_64-pc-windows-msvc\app\concat.exe" "stage\$name\"
           Copy-Item "$env:FFMPEG_DIR\bin\*.dll" "stage\$name\"
           Copy-Item "$env:SHERPA_DLL_DIR\*.dll" "stage\$name\"
-          Copy-Item LICENSE, THIRD_PARTY_NOTICES.md "stage\$name\"
-          Compress-Archive -Path "stage\$name" -DestinationPath "stage\$name.zip"
+          Copy-Item "source\concat_tr\LICENSE", "source\concat_tr\THIRD_PARTY_NOTICES.md" "stage\$name\"
+          Compress-Archive -Path "stage\$name" -DestinationPath "stage\$name.zip" -Force
+          Remove-Item -Recurse -Force "stage\$name"
 
       - uses: actions/upload-artifact@v7
         with:
