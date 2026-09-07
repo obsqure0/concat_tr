@@ -1,0 +1,18 @@
+diff --git a/engine/crates/concat/ui/inspector/text-panel.slint b/engine/crates/concat/ui/inspector/text-panel.slint
+index 9f97d34..7e1eb49 100644
+--- a/engine/crates/concat/ui/inspector/text-panel.slint
++++ b/engine/crates/concat/ui/inspector/text-panel.slint
+@@ -104,8 +104,11 @@ export component TextPanel inherits VerticalLayout {
+                     selection-background-color: Theme.accent;
+                     selection-foreground-color: Theme.on-accent;
+ 
+-                    // Committed on the way out rather than per keystroke, so a
+-                    // title being typed is one change and not forty.
++                    // Preview every keystroke through the editor's echo so
++                    // the words appear on the monitor immediately. The undo
++                    // history still receives a single change when focus leaves
++                    // the field, because only then do we commit the echo.
++                    edited => { root.set-text(ClipTextField.content, self.text); }
+                     changed has-focus => {
+                         if (!self.has-focus) {
+                             root.set-text(ClipTextField.content, self.text);
