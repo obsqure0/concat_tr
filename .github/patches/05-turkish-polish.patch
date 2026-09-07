@@ -1,0 +1,39 @@
+diff --git a/engine/crates/concat/src/studio.rs b/engine/crates/concat/src/studio.rs
+index 9c4ccac..8e5e8fd 100644
+--- a/engine/crates/concat/src/studio.rs
++++ b/engine/crates/concat/src/studio.rs
+@@ -5018,14 +5018,11 @@ impl Studio {
+ 
+         app.set_on_start(self.on_start);
+         app.set_project_name(self.project_name.as_str().into());
+-        app.set_project_status(
+-            if self.dirty {
+-                "unsaved changes"
+-            } else {
+-                "saved"
+-            }
+-            .into(),
+-        );
++        app.set_project_status(if self.dirty {
++            t("unsaved changes")
++        } else {
++            t("saved")
++        }.into());
+         app.set_toast(ToastData {
+             token: self.toast.token,
+             message: self.toast.message.as_str().into(),
+diff --git a/engine/crates/concat/locales/tr.json b/engine/crates/concat/locales/tr.json
+index db7cd46..2d1b9eb 100644
+--- a/engine/crates/concat/locales/tr.json
++++ b/engine/crates/concat/locales/tr.json
+@@ -517,5 +517,9 @@
+   "{0} minutes ago": "{0} dakika önce",
+   "{0} months ago": "{0} ay önce",
+   "{0}m {1}s left": "{0} dk {1} sn kaldı",
+-  "{0}s left": "{0} sn kaldı"
++  "{0}s left": "{0} sn kaldı",
++  "unsaved changes": "kaydedilmemiş değişiklikler",
++  "{0} clips": "{0} klip",
++  "{0} clips · {1} titles": "{0} klip · {1} metin",
++  "Could not create the export folder: {0}": "Dışa aktarma klasörü oluşturulamadı: {0}"
+ }
