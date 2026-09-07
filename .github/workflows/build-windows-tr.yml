@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'Concat-0.2.1-TR-kaynak.zip'
+      - '.github/patches/*.patch'
       - '.github/workflows/build-windows-tr.yml'
 
 env:
@@ -35,6 +36,26 @@ jobs:
             throw "source\concat_tr\engine\Cargo.toml not found after extraction"
           }
           Write-Host "Source extracted successfully"
+
+      - name: Apply custom fixes
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $patches = Get-ChildItem "$env:GITHUB_WORKSPACE\.github\patches\*.patch" | Sort-Object Name
+          if (-not $patches) { throw "No custom patches found" }
+          Push-Location "source\concat_tr"
+          try {
+            foreach ($patch in $patches) {
+              Write-Host "Applying $($patch.Name)"
+              git apply --check $patch.FullName
+              if ($LASTEXITCODE -ne 0) { throw "Patch check failed: $($patch.Name)" }
+              git apply $patch.FullName
+              if ($LASTEXITCODE -ne 0) { throw "Patch apply failed: $($patch.Name)" }
+            }
+          } finally {
+            Pop-Location
+          }
+          Write-Host "Custom fixes applied successfully"
 
       - name: Read version
         id: version
