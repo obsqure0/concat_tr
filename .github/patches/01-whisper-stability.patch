@@ -1,0 +1,148 @@
+diff --git a/engine/crates/concat-speech/src/transcribe.rs b/engine/crates/concat-speech/src/transcribe.rs
+index 82f987e..0f80d1c 100644
+--- a/engine/crates/concat-speech/src/transcribe.rs
++++ b/engine/crates/concat-speech/src/transcribe.rs
+@@ -340,46 +340,108 @@ impl Transcriber {
+             });
+         }
+         let context = &loaded.as_ref().expect("model loaded above").context;
+-        let mut state = context
+-            .create_state()
+-            .map_err(|error| format!("could not start whisper: {error}"))?;
+ 
++        // whisper.cpp normally walks long inputs in 30-second windows on its
++        // own. Some Windows CPU/backend combinations can nevertheless return
++        // its generic encoder failure (-6) part-way through a longer clip.
++        // Feeding independent sub-30-second windows is both more memory
++        // friendly and gives us a useful retry point. A failed window is tried
++        // once more with a single worker thread before we give up.
++        const WHISPER_RATE: usize = 16_000;
++        const CHUNK_SECONDS: usize = 28;
++        const CHUNK_SAMPLES: usize = WHISPER_RATE * CHUNK_SECONDS;
+         let threads = std::thread::available_parallelism()
+-            .map(|count| count.get().min(8))
+-            .unwrap_or(4);
+-        let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
+-        params.set_n_threads(threads as i32);
+-        params.set_language(Some(if request.language.is_empty() {
+-            "auto"
+-        } else {
+-            &request.language
+-        }));
+-        params.set_print_special(false);
+-        params.set_print_progress(false);
+-        params.set_print_realtime(false);
+-        params.set_print_timestamps(false);
+-        params.set_suppress_blank(true);
+-        let abort = Arc::clone(&cancel);
+-        params.set_abort_callback_safe(move || abort.load(Ordering::Relaxed));
+-        params.set_progress_callback_safe(progress);
+-
+-        state
+-            .full(params, &samples)
+-            .map_err(|error| format!("transcription failed: {error}"))?;
++            .map(|count| count.get().min(4))
++            .unwrap_or(2)
++            .max(1);
++        let progress = Arc::new(Mutex::new(progress));
++        let total_samples = samples.len().max(1);
++        let mut all_segments = Vec::new();
++
++        for (chunk_index, chunk) in samples.chunks(CHUNK_SAMPLES).enumerate() {
++            if cancel.load(Ordering::Relaxed) {
++                return Err("transcription cancelled".to_owned());
++            }
++            let chunk_start = chunk_index * CHUNK_SAMPLES;
++            let time_offset = chunk_start as f64 / WHISPER_RATE as f64;
++            let mut completed = None;
++            let mut last_error = None;
++
++            for attempt_threads in [threads, 1] {
++                // Do not run the same single-thread attempt twice.
++                if attempt_threads == 1 && threads == 1 && last_error.is_some() {
++                    break;
++                }
++                let mut state = context
++                    .create_state()
++                    .map_err(|error| format!("could not start whisper: {error}"))?;
++                let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
++                params.set_n_threads(attempt_threads as i32);
++                params.set_language(Some(if request.language.is_empty() {
++                    "auto"
++                } else {
++                    &request.language
++                }));
++                params.set_print_special(false);
++                params.set_print_progress(false);
++                params.set_print_realtime(false);
++                params.set_print_timestamps(false);
++                params.set_suppress_blank(true);
++                let abort = Arc::clone(&cancel);
++                params.set_abort_callback_safe(move || abort.load(Ordering::Relaxed));
++
++                let callback = Arc::clone(&progress);
++                let base = chunk_start as f32 / total_samples as f32;
++                let span = chunk.len() as f32 / total_samples as f32;
++                params.set_progress_callback_safe(move |percent| {
++                    let overall = ((base + span * (percent as f32 / 100.0)) * 100.0)
++                        .round()
++                        .clamp(0.0, 100.0) as i32;
++                    if let Ok(mut callback) = callback.lock() {
++                        (*callback)(overall);
++                    }
++                });
++
++                match state.full(params, chunk) {
++                    Ok(()) => {
++                        let segments: Vec<Segment> = state
++                            .as_iter()
++                            .filter_map(|segment| {
++                                // Whisper's timestamps are centiseconds and
++                                // are relative to this chunk.
++                                let start = time_offset
++                                    + segment.start_timestamp() as f64 / 100.0;
++                                let end = time_offset
++                                    + segment.end_timestamp() as f64 / 100.0;
++                                let text = segment.to_str_lossy().ok()?.trim().to_owned();
++                                keep_segment(start, end, text)
++                            })
++                            .collect();
++                        completed = Some(segments);
++                        break;
++                    }
++                    Err(error) => {
++                        last_error = Some(error.to_string());
++                    }
++                }
++            }
++
++            let Some(segments) = completed else {
++                return Err(format!(
++                    "transcription failed around {:.0}s: {}. Try the Tiny or Base multilingual model and close other heavy apps.",
++                    time_offset,
++                    last_error.unwrap_or_else(|| "Whisper encoder error".to_owned())
++                ));
++            };
++            all_segments.extend(segments);
++        }
+         if cancel.load(Ordering::Relaxed) {
+             return Err("transcription cancelled".to_owned());
+         }
+-
+-        Ok(state
+-            .as_iter()
+-            .filter_map(|segment| {
+-                // Whisper's timestamps are centiseconds.
+-                let start = segment.start_timestamp() as f64 / 100.0;
+-                let end = segment.end_timestamp() as f64 / 100.0;
+-                let text = segment.to_str_lossy().ok()?.trim().to_owned();
+-                keep_segment(start, end, text)
+-            })
+-            .collect())
++        if let Ok(mut callback) = progress.lock() {
++            (*callback)(100);
++        }
++        Ok(all_segments)
+     }
+ 
+     /// Asks the running transcription to stop at its next check.
