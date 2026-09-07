@@ -1,0 +1,22 @@
+CONCAT 0.2.1 TR - WINDOWS x86_64 DERLEME
+
+Kod yazman gerekmiyor.
+
+GitHub Actions ile:
+1) Bu klasorun tamamini bir GitHub deposuna yukle.
+2) GitHub'da Actions sekmesine gir.
+3) Soldan "Build Windows TR" sec.
+4) "Run workflow" dugmesine bas.
+5) Is bitince sayfanin altindaki Artifacts bolumunden
+   "Concat-TR-windows-x86_64" dosyasini indir.
+6) ZIP'i tamamen cikart ve concat.exe'yi ayni DLL'lerle beraber calistir.
+
+Bu ozel surumde:
+- Arayuz varsayilan Turkce
+- Turkce otomatik altyazi / yerel Whisper
+- Model yoksa base modelini indirip devam etme
+- Ctrl + + timeline zoom
+- Playhead'i tutup surukleme ve kenarda otomatik timeline kaydirma
+
+Not: Windows Smart App Control imzasiz DLL/EXE'leri engelleyebilir.
+Kaynak AGPL-3.0-or-later lisanslidir; LICENSE dosyasini koruyun.
