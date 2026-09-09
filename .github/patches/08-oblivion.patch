@@ -3599,122 +3599,122 @@ diff --git a/engine/crates/concat-speech/src/transcribe.rs b/engine/crates/conca
 +        .unwrap_or(false)
 +}
 +
-+/// Windows fallback backend for captions. The in-process whisper.cpp build can
-+/// return its opaque `-6` encoder error on some PCs even with valid audio and
-+/// models. sherpa-onnx is already shipped by Concat for TTS, and its Whisper
-+/// ONNX backend is independent of whisper.cpp, so use it on Windows instead of
-+/// retrying the same failing encoder over and over.
++/// Install only the three inference files, streaming the archive from HTTPS.
++/// This avoids storing the full archive, float32 copies and test recordings.
 +#[cfg(windows)]
 +fn ensure_sherpa_whisper_model(
 +    dirs: &AppDirs,
 +    cancel: &std::sync::atomic::AtomicBool,
 +    mut report_percent: impl FnMut(i32),
 +) -> Result<(), String> {
-+    use std::sync::atomic::Ordering;
++    use std::io::Read;
++    use std::sync::atomic::AtomicBool;
++
++    struct ProgressReader<'a, R, F> {
++        inner: R,
++        cancel: &'a AtomicBool,
++        report: F,
++        received: u64,
++        last_report: u64,
++        total: u64,
++    }
++
++    impl<R: Read, F: FnMut(i32)> Read for ProgressReader<'_, R, F> {
++        fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
++            if self.cancel.load(Ordering::Relaxed) {
++                // Interrupted is retried by io::copy; cancellation must be terminal.
++                return Err(std::io::Error::other("transcription cancelled"));
++            }
++            let count = self.inner.read(buffer)?;
++            self.received += count as u64;
++            if self.received - self.last_report >= 2 * 1024 * 1024 || count == 0 {
++                self.last_report = self.received;
++                let percent = (self.received as f64 / self.total.max(1) as f64 * 20.0)
++                    .clamp(0.0, 20.0) as i32;
++                (self.report)(percent);
++            }
++            Ok(count)
++        }
++    }
 +
 +    if sherpa_whisper_ready(dirs) {
 +        return Ok(());
 +    }
-+
 +    let parent = dirs.data.join("sherpa-whisper-models");
-+    std::fs::create_dir_all(&parent)
-+        .map_err(|error| format!("could not create {}: {error}", parent.display()))?;
++    std::fs::create_dir_all(&parent).map_err(|error| error.to_string())?;
 +    let destination = parent.join(SHERPA_WHISPER_ID);
-+    let archive = parent.join(format!("{SHERPA_WHISPER_ID}.tar.bz2.part"));
 +    let staging = parent.join(format!(".staging-{SHERPA_WHISPER_ID}"));
-+    let _ = std::fs::remove_file(&archive);
 +    let _ = std::fs::remove_dir_all(&staging);
++    std::fs::create_dir_all(&staging).map_err(|error| error.to_string())?;
 +
-+    let url = format!(
-+        "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/{SHERPA_WHISPER_ID}.tar.bz2"
-+    );
-+    let mut download_progress = |progress: DownloadProgress| {
-+        let percent = if progress.total > 0 {
-+            ((progress.received as f64 / progress.total as f64) * 20.0)
-+                .round()
-+                .clamp(0.0, 20.0) as i32
-+        } else {
-+            0
++    let outcome = (|| {
++        let url = format!(
++            "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/{SHERPA_WHISPER_ID}.tar.bz2"
++        );
++        let response = ureq::AgentBuilder::new()
++            .timeout_connect(std::time::Duration::from_secs(20))
++            .timeout_read(std::time::Duration::from_secs(30))
++            .build()
++            .get(&url)
++            .call()
++            .map_err(|error| format!("caption model download failed: {error}"))?;
++        let total = response.header("Content-Length")
++            .and_then(|value| value.parse::<u64>().ok())
++            .unwrap_or(SHERPA_WHISPER_ARCHIVE_ESTIMATE);
++        let reader = ProgressReader {
++            inner: response.into_reader(), cancel, report: &mut report_percent,
++            received: 0, last_report: 0, total,
 +        };
-+        report_percent(percent);
-+    };
-+    crate::download_to(
-+        &url,
-+        &archive,
-+        SHERPA_WHISPER_ID,
-+        SHERPA_WHISPER_ARCHIVE_ESTIMATE,
-+        cancel,
-+        &mut download_progress,
-+    )?;
-+    if cancel.load(Ordering::Relaxed) {
-+        let _ = std::fs::remove_file(&archive);
-+        return Err("transcription cancelled".to_owned());
-+    }
-+
-+    std::fs::create_dir_all(&staging)
-+        .map_err(|error| format!("could not create {}: {error}", staging.display()))?;
-+    report_percent(21);
-+    let file = std::fs::File::open(&archive)
-+        .map_err(|error| format!("could not reopen caption model: {error}"))?;
-+    let decoder = bzip2::read::BzDecoder::new(std::io::BufReader::new(file));
-+    let mut tar = tar::Archive::new(decoder);
-+    for entry in tar
-+        .entries()
-+        .map_err(|error| format!("could not read caption model archive: {error}"))?
-+    {
++        let decoder = bzip2::read::BzDecoder::new(std::io::BufReader::new(reader));
++        let mut archive = tar::Archive::new(decoder);
++        let required = [
++            ("base-encoder.int8.onnx", 5_000_000),
++            ("base-decoder.int8.onnx", 20_000_000),
++            ("base-tokens.txt", 100_000),
++        ];
++        for entry in archive.entries().map_err(|error| error.to_string())? {
++            let mut entry = entry.map_err(|error| error.to_string())?;
++            let path = entry.path().map_err(|error| error.to_string())?.into_owned();
++            let Some((name, _)) = required.iter().find(|(name, _)| {
++                path == std::path::Path::new(SHERPA_WHISPER_ID).join(name)
++            }) else { continue; };
++            if !entry.header().entry_type().is_file() {
++                return Err("caption model archive contains an invalid file".to_owned());
++            }
++            let mut output = std::fs::File::create(staging.join(name))
++                .map_err(|error| format!("could not write caption model: {error}"))?;
++            std::io::copy(&mut entry, &mut output)
++                .map_err(|error| format!("caption model download interrupted: {error}"))?;
++        }
++        // Consume the compressed trailer as well, so a damaged archive is rejected.
++        let mut decoder = archive.into_inner();
++        std::io::copy(&mut decoder, &mut std::io::sink())
++            .map_err(|error| format!("caption model archive was damaged: {error}"))?;
++        drop(decoder);
++        report_percent(21);
 +        if cancel.load(Ordering::Relaxed) {
-+            let _ = std::fs::remove_file(&archive);
-+            let _ = std::fs::remove_dir_all(&staging);
 +            return Err("transcription cancelled".to_owned());
 +        }
-+        entry
-+            .and_then(|mut entry| entry.unpack_in(&staging))
-+            .map_err(|error| format!("could not unpack caption model: {error}"))?;
-+    }
-+
-+    let unpacked = staging.join(SHERPA_WHISPER_ID);
-+    let required = [
-+        unpacked.join("base-encoder.int8.onnx"),
-+        unpacked.join("base-decoder.int8.onnx"),
-+        unpacked.join("base-tokens.txt"),
-+    ];
-+    if !required
-+        .iter()
-+        .zip([5_000_000, 20_000_000, 100_000])
-+        .all(|(path, minimum)| {
-+            path.metadata()
-+                .is_ok_and(|m| m.is_file() && m.len() > minimum)
-+        })
-+    {
-+        let _ = std::fs::remove_file(&archive);
++        if !required.iter().all(|(name, minimum)| {
++            staging.join(name).metadata().is_ok_and(|meta| meta.is_file() && meta.len() > *minimum)
++        }) {
++            return Err("caption model archive was incomplete".to_owned());
++        }
++        if destination.exists() {
++            std::fs::remove_dir_all(&destination).map_err(|error| error.to_string())?;
++        }
++        // Rename on the same filesystem; no second copy or half-installed model.
++        std::fs::rename(&staging, &destination)
++            .map_err(|error| format!("could not finish caption model: {error}"))?;
++        report_percent(25);
++        Ok(())
++    })();
++    if outcome.is_err() {
 +        let _ = std::fs::remove_dir_all(&staging);
-+        return Err("caption model archive was incomplete".to_owned());
 +    }
-+
-+    // Keep only the three files used by the editor. The release archive also
-+    // contains float32 copies and test WAVs which would otherwise waste disk.
-+    let compact = staging.join("compact");
-+    std::fs::create_dir_all(&compact)
-+        .map_err(|error| format!("could not prepare caption model: {error}"))?;
-+    for path in &required {
-+        let name = path
-+            .file_name()
-+            .ok_or_else(|| "invalid caption model path".to_owned())?;
-+        std::fs::copy(path, compact.join(name))
-+            .map_err(|error| format!("could not prepare caption model: {error}"))?;
-+    }
-+    let _ = std::fs::remove_dir_all(&destination);
-+    std::fs::rename(&compact, &destination)
-+        .map_err(|error| format!("could not finish caption model: {error}"))?;
-+    let _ = std::fs::remove_file(&archive);
-+    let _ = std::fs::remove_dir_all(&staging);
-+    report_percent(25);
-+
-+    if !sherpa_whisper_ready(dirs) {
-+        return Err("caption model could not be prepared".to_owned());
-+    }
-+    Ok(())
++    outcome
 +}
++
 +
 +/// Turn recognizer prose into short on-screen phrases rather than one giant
 +/// title. This is intentionally closer to social-video captioning: about 2-5

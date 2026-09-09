@@ -16,7 +16,7 @@ Hazır altyazınız varsa aynı penceredeki **SRT altyazı içe aktar** ile UTF-
 
 - Uygulama adı, pencere başlığı ve Windows dosyası **Oblivion**.
 - Windows'taki `Generic whisper error -6` üreten whisper.cpp yolu yerine sherpa-onnx CPU motoru.
-- Tek model indirme akışı, ilerleme ve iptal desteği.
+- Tek model indirme akışı, ilerleme ve iptal desteği. Arşiv diske yazılmadan yalnızca gereken üç model dosyası açılır.
 - Minecraft, klasik, sarı vurgu ve koyu zemin altyazı stilleri.
 - Dört kelimelik kısa satırlar ve SRT içe aktarma.
 - Metin kitaplığında Minecraft, sarı vurgu ve bölüm başlığı hazır stilleri.
