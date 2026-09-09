@@ -3143,7 +3143,7 @@ diff --git a/engine/crates/concat-speech/examples/caption_smoke.rs b/engine/crat
 new file mode 100644
 --- /dev/null
 +++ b/engine/crates/concat-speech/examples/caption_smoke.rs
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,53 @@
 +// SPDX-License-Identifier: AGPL-3.0-or-later
 +// SPDX-FileCopyrightText: 2026 Oblivion contributors
 +
@@ -3153,13 +3153,16 @@ new file mode 100644
 +use concat_speech::transcribe::TranscribeRequest;
 +
 +fn main() -> Result<(), String> {
++    eprintln!("Starting Oblivion speech smoke test");
 +    let path = std::env::args()
 +        .nth(1)
 +        .ok_or("Pass the JFK speech WAV path")?;
 +    let root = std::env::temp_dir().join("oblivion-caption-smoke");
 +    let dirs = AppDirs::under(&root);
 +    let transcriber = Transcriber::new();
++    eprintln!("Preparing multilingual Base model");
 +    transcriber.download_model(&dirs, "base", |_| {})?;
++    eprintln!("Model ready; decoding reference audio");
 +    let request = TranscribeRequest {
 +        path,
 +        source_start: 0.0,

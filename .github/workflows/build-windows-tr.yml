@@ -91,6 +91,7 @@ jobs:
           workspaces: source/concat_tr/engine
           key: windows-tr-x86_64
           env-vars: CARGO CC CFLAGS CXX CMAKE RUST GGML
+          cache-on-failure: true
 
       - name: Build
         shell: bash
@@ -106,9 +107,29 @@ jobs:
           $ErrorActionPreference = "Stop"
           curl.exe -fsSL --retry 3 -o jfk.wav https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/samples/jfk.wav
           if ($LASTEXITCODE -ne 0) { throw "Could not download reference speech" }
-          $env:PATH = "$env:SHERPA_DLL_DIR;$env:PATH"
-          & ./target/x86_64-pc-windows-msvc/app/examples/caption_smoke.exe jfk.wav
-          if ($LASTEXITCODE -ne 0) { throw "Actual speech transcription failed" }
+          $testFolder = Join-Path $PWD "target/x86_64-pc-windows-msvc/app/examples"
+          Copy-Item "$env:SHERPA_DLL_DIR\*.dll" $testFolder
+          Copy-Item "$env:FFMPEG_DIR\bin\*.dll" $testFolder
+          $testProgram = Join-Path $testFolder "caption_smoke.exe"
+          $started = Get-Date
+          $testProcess = Start-Process -FilePath $testProgram -ArgumentList "jfk.wav" -WorkingDirectory $PWD -WindowStyle Hidden -PassThru -Wait -RedirectStandardOutput smoke.stdout.txt -RedirectStandardError smoke.stderr.txt
+          Get-Content smoke.stdout.txt, smoke.stderr.txt
+          Write-Host "Speech test exit code: $($testProcess.ExitCode)"
+          if ($testProcess.ExitCode -ne 0) {
+            Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=$started} -ErrorAction SilentlyContinue | Where-Object { $_.Message -match 'caption_smoke' } | Select-Object -ExpandProperty Message
+            throw "Actual speech transcription failed: $($testProcess.ExitCode)"
+          }
+
+      - name: Preserve speech diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Oblivion-speech-diagnostics
+          path: |
+            source/concat_tr/engine/smoke.*.txt
+            source/concat_tr/engine/target/x86_64-pc-windows-msvc/app/examples/caption_smoke.exe
+            source/concat_tr/engine/target/x86_64-pc-windows-msvc/app/examples/*.dll
+          if-no-files-found: ignore
 
       - name: Build log to summary
         if: failure()
