@@ -1,12 +1,15 @@
-name: Build Windows TR
+name: Build Oblivion Windows
 
 on:
+  pull_request:
+    branches: [main]
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'Concat-0.2.1-TR-kaynak.zip'
       - '.github/patches/*.patch'
+      - 'scripts/prepare_oblivion.py'
       - '.github/workflows/build-windows-tr.yml'
 
 env:
@@ -23,39 +26,19 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Extract source
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          if (-not (Test-Path "Concat-0.2.1-TR-kaynak.zip")) {
-            throw "Concat-0.2.1-TR-kaynak.zip not found in repository root"
-          }
-          Remove-Item -Recurse -Force source -ErrorAction SilentlyContinue
-          Expand-Archive -LiteralPath "Concat-0.2.1-TR-kaynak.zip" -DestinationPath source -Force
-          if (-not (Test-Path "source\concat_tr\engine\Cargo.toml")) {
-            throw "source\concat_tr\engine\Cargo.toml not found after extraction"
-          }
-          Write-Host "Source extracted successfully"
+      - name: Prepare and verify Oblivion source
+        run: python scripts/prepare_oblivion.py
 
-      - name: Apply custom fixes
+      - name: Subtitle regression tests
         shell: pwsh
         run: |
-          $ErrorActionPreference = "Stop"
-          $patches = Get-ChildItem "$env:GITHUB_WORKSPACE\.github\patches\*.patch" | Sort-Object Name
-          if (-not $patches) { throw "No custom patches found" }
-          Push-Location "source\concat_tr"
-          try {
-            foreach ($patch in $patches) {
-              Write-Host "Applying $($patch.Name)"
-              git apply --check $patch.FullName
-              if ($LASTEXITCODE -ne 0) { throw "Patch check failed: $($patch.Name)" }
-              git apply $patch.FullName
-              if ($LASTEXITCODE -ne 0) { throw "Patch apply failed: $($patch.Name)" }
-            }
-          } finally {
-            Pop-Location
-          }
-          Write-Host "Custom fixes applied successfully"
+          rustc --edition 2024 --test source/concat_tr/engine/crates/concat-speech/src/subtitles.rs -o subtitle-tests.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Subtitle test compilation failed' }
+          ./subtitle-tests.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Subtitle tests failed' }
+          $env:PYTHONUTF8 = '1'
+          python source/concat_tr/scripts/locales.py --check
+          if ($LASTEXITCODE -ne 0) { throw 'Locale inventory failed' }
 
       - name: Read version
         id: version
@@ -66,7 +49,7 @@ jobs:
           if (-not $match) { throw "Version not found in Cargo.toml" }
           $version = $match.Matches[0].Groups[1].Value
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          Write-Host "Building Concat $version"
+          Write-Host "Building Oblivion $version"
 
       - name: LLVM and FFmpeg
         shell: pwsh
@@ -135,17 +118,19 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           $ErrorActionPreference = "Stop"
-          $name = "Concat-$env:VERSION-TR-windows-x86_64"
+          $name = "Oblivion-$env:VERSION-TR-windows-x86_64"
           New-Item -ItemType Directory -Force "stage\$name" | Out-Null
-          Copy-Item "source\concat_tr\engine\target\x86_64-pc-windows-msvc\app\concat.exe" "stage\$name\"
+          Copy-Item "source\concat_tr\engine\target\x86_64-pc-windows-msvc\app\concat.exe" "stage\$name\Oblivion.exe"
           Copy-Item "$env:FFMPEG_DIR\bin\*.dll" "stage\$name\"
           Copy-Item "$env:SHERPA_DLL_DIR\*.dll" "stage\$name\"
           Copy-Item "source\concat_tr\LICENSE", "source\concat_tr\THIRD_PARTY_NOTICES.md" "stage\$name\"
+          Copy-Item OBLIVION_TR.md "stage\$name\"
           Compress-Archive -Path "stage\$name" -DestinationPath "stage\$name.zip" -Force
-          Remove-Item -Recurse -Force "stage\$name"
+          python scripts/package_source.py
+          if ($LASTEXITCODE -ne 0) { throw "Source packaging failed" }
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Concat-TR-windows-x86_64
+          name: Oblivion-TR-windows-x86_64
           path: stage/*.zip
           if-no-files-found: error
