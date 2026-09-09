@@ -1,0 +1,4335 @@
+diff --git a/engine/Cargo.lock b/engine/Cargo.lock
+--- a/engine/Cargo.lock
++++ b/engine/Cargo.lock
+@@ -1181,7 +1181,7 @@
+ 
+ [[package]]
+ name = "concat"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "concat-effects",
+@@ -1204,7 +1204,7 @@
+ 
+ [[package]]
+ name = "concat-android"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "android_logger",
+  "concat",
+@@ -1215,7 +1215,7 @@
+ 
+ [[package]]
+ name = "concat-cli"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "clap",
+  "concat-core",
+@@ -1225,11 +1225,11 @@
+ 
+ [[package]]
+ name = "concat-core"
+-version = "0.2.1"
++version = "0.2.2"
+ 
+ [[package]]
+ name = "concat-effects"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "concat-project",
+@@ -1241,7 +1241,7 @@
+ 
+ [[package]]
+ name = "concat-export"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "concat-effects",
+@@ -1254,7 +1254,7 @@
+ 
+ [[package]]
+ name = "concat-host"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "concat-export",
+@@ -1271,7 +1271,7 @@
+ 
+ [[package]]
+ name = "concat-media"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "ffmpeg-the-third",
+@@ -1281,7 +1281,7 @@
+ 
+ [[package]]
+ name = "concat-project"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "serde",
+@@ -1291,7 +1291,7 @@
+ 
+ [[package]]
+ name = "concat-render"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "concat-effects",
+@@ -1301,7 +1301,7 @@
+ 
+ [[package]]
+ name = "concat-speech"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "bzip2 0.6.1",
+  "concat-host",
+@@ -1316,7 +1316,7 @@
+ 
+ [[package]]
+ name = "concat-text"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "fontdb",
+  "rustybuzz",
+@@ -1326,7 +1326,7 @@
+ 
+ [[package]]
+ name = "concat-vision"
+-version = "0.2.1"
++version = "0.2.2"
+ dependencies = [
+  "concat-core",
+  "concat-project",
+diff --git a/engine/Cargo.toml b/engine/Cargo.toml
+--- a/engine/Cargo.toml
++++ b/engine/Cargo.toml
+@@ -3,7 +3,7 @@
+ members = ["crates/*"]
+ 
+ [workspace.package]
+-version = "0.2.1"
++version = "0.2.2"
+ edition = "2024"
+ rust-version = "1.93"
+ license = "AGPL-3.0-or-later"  # + plugin exception, see LICENSE-EXCEPTIONS.md
+diff --git a/engine/crates/concat/locales/de.json b/engine/crates/concat/locales/de.json
+--- a/engine/crates/concat/locales/de.json
++++ b/engine/crates/concat/locales/de.json
+@@ -37,8 +37,8 @@
+   "Apply": "Anwenden",
+   "Audio": "Audio",
+   "audio effect": "Audioeffekt",
++  "Audio Effects": "Audioeffekte",
+   "Audio effects": "Audioeffekte",
+-  "Audio Effects": "Audioeffekte",
+   "Auto": "Auto",
+   "auto": "auto",
+   "Auto captions": "Automatische Untertitel",
+@@ -52,8 +52,8 @@
+   "Bits": "Bits",
+   "Black & White": "Schwarz-Weiß",
+   "Blend": "Überblenden",
++  "Blue screen": "Bluescreen",
+   "Blue Screen": "Bluescreen",
+-  "Blue screen": "Bluescreen",
+   "Blur": "Unschärfe",
+   "Body": "Körper",
+   "Bold": "Fett",
+@@ -82,11 +82,13 @@
+   "centred": "zentriert",
+   "Change pitch with speed": "Tonhöhe mit Tempo ändern",
+   "Change what this panel shows, or drag it onto another": "Ändere, was dieses Panel zeigt, oder ziehe es auf ein anderes",
++  "Chapter card": "Chapter card",
+   "Chinese": "Chinesisch",
+   "Chipmunk": "Streifenhörnchen",
+   "Choose a folder": "Ordner wählen",
+   "Choose where the project folder should go": "Wähle, wohin der Projektordner soll",
+   "Choose…": "Wählen…",
++  "Classic": "Classic",
+   "Clean": "Säubern",
+   "Clear strokes": "Striche löschen",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Nimmt den Raum aus einer Aufnahme: Rumpeln, Rauschen, Zischlaute und ungleichen Pegel.",
+@@ -96,7 +98,6 @@
+   "Color": "Farbe",
+   "Colour": "Farbe",
+   "Combo": "Kombi",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Inhalt",
+   "CONTENTS": "INHALT",
+   "Contents": "Inhalt",
+@@ -106,6 +107,9 @@
+   "Copied": "Kopiert",
+   "Copy": "Kopieren",
+   "Copy system information": "Systeminformationen kopieren",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "Speichern nicht möglich: {0}",
+   "Could not show the file: {0}": "Datei konnte nicht angezeigt werden: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Freistellen",
+   "Dancing grain, the texture of film stock.": "Tanzendes Korn, die Textur von Filmmaterial.",
+   "Dark": "Dunkel",
++  "Dark plate": "Dark plate",
+   "Darken": "Abdunkeln",
+   "Darkened corners that draw the eye to the middle.": "Abgedunkelte Ecken, die den Blick zur Mitte lenken.",
+   "Decay": "Abklingen",
+@@ -149,6 +154,7 @@
+   "Duration": "Dauer",
+   "Echo": "Echo",
+   "Edit": "Bearbeiten",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "Effekt",
+   "Effect library": "Effektbibliothek",
+   "Effects": "Effekte",
+@@ -180,8 +186,8 @@
+   "File": "Datei",
+   "Fill": "Füllung",
+   "Film Grain": "Filmkorn",
++  "filter": "Filter",
+   "Filter": "Filter",
+-  "filter": "Filter",
+   "Filter library": "Filterbibliothek",
+   "Filters": "Filter",
+   "Finalising file": "Datei wird fertiggestellt",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Gaußsche Unschärfe",
+   "General": "Allgemein",
+   "Generate captions": "Untertitel erzeugen",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Sprache erzeugen",
+   "Generating voice": "Stimme wird erzeugt",
+   "Glow": "Glühen",
+@@ -224,6 +231,7 @@
+   "Images": "Bilder",
+   "Import media": "Medien importieren",
+   "Import media…": "Medien importieren…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "1 Datei importiert",
+   "Imported {0} files": "{0} Dateien importiert",
+   "Importing…": "Wird importiert…",
+@@ -271,6 +279,7 @@
+   "Master": "Master",
+   "Media": "Medien",
+   "Medium": "Mittel",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimal",
+   "Mirror": "Spiegel",
+   "Mixing audio": "Ton wird gemischt",
+@@ -295,8 +304,9 @@
+   "Neon": "Neon",
+   "New project": "Neues Projekt",
+   "Next frame": "Nächstes Bild",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Noch keine Vorlagen. Markiere Medien als Platzhalter und speichere dieses Projekt dann als Vorlage.",
+   "No voice to read with": "Keine Stimme zum Vorlesen",
+   "Noise": "Rauschen",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Noch nichts zu lesen",
+   "Nothing under the playhead": "Nichts unter dem Abspielkopf",
+   "Nothing was said in that clip": "In diesem Clip wurde nichts gesagt",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Aus",
+   "off": "aus",
+   "One repeat, fading.": "Eine Wiederholung, ausklingend.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Ein Titel pro gesprochenem Satz, im Takt der Wörter geschnitten, auf der ersten freien Spur.",
+   "Only panel": "Einziges Panel",
+   "Opacity": "Deckkraft",
+   "Operating system": "Betriebssystem",
++  "Original": "Original",
+   "Other": "Sonstige",
+   "Out": "Aus",
+   "Outline": "Kontur",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Auf dem Monitor malen",
+   "Paste": "Einfügen",
+   "Pause": "Pause",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Wähle einen Effekt oder Filter aus der Bibliothek",
+   "Pitch": "Tonhöhe",
+   "Pixelate": "Verpixeln",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Schärfen",
+   "Shifts the picture towards candlelight.": "Verschiebt das Bild in Richtung Kerzenlicht.",
+   "Shifts the picture towards daylight shade.": "Verschiebt das Bild in Richtung Tageslichtschatten.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Im Ordner zeigen",
+   "Show {0}": "{0} einblenden",
+   "Silent": "Stumm",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Am Abspielkopf teilen (S, oder ⌘B für jeden Clip)",
+   "Stone and height: reflections that take a while to arrive.": "Stein und Höhe: Reflexionen, die eine Weile brauchen.",
+   "Strength": "Stärke",
++  "Style": "Style",
+   "Stylize": "Stilisieren",
+   "Subtitle": "Untertitel",
+   "Summary": "Zusammenfassung",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Text zu Sprache…",
+   "The bulge of a very wide lens.": "Die Wölbung eines sehr weiten Objektivs.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "Die Kette läuft von oben nach unten — ordne sie mit den Pfeilen um. Das Auge umgeht ein Glied, ohne die eingestellten Werte zu verlieren.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "Der Clip ist nicht mehr auf der Zeitleiste",
+   "The early reflections of a room.": "Die frühen Reflexionen eines Raums.",
+   "The left half, reflected onto the right.": "Die linke Hälfte, auf die rechte gespiegelt.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "{0} entsperren",
+   "Unmute {0}": "{0} laut schalten",
+   "Unpacking…": "Wird entpackt…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Unbenanntes Projekt",
+   "Up or down by semitones, the length untouched.": "Nach oben oder unten in Halbtönen, die Länge unverändert.",
+   "Vertical": "Vertikal",
+@@ -503,12 +520,15 @@
+   "Warm": "Warm",
+   "Where should the project folder go?": "Wohin soll der Projektordner?",
+   "Width": "Breite",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "gestern",
++  "Zoom in": "Vergrößern",
+   "Zoom In": "Hineinzoomen",
+-  "Zoom in": "Vergrößern",
+   "Zoom out": "Verkleinern",
+   "Zoom Out": "Herauszoomen",
+   "Zoom to fit": "Einpassen",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "vor {0} Tagen",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} installiert · {1} MB belegt",
+diff --git a/engine/crates/concat/locales/en.json b/engine/crates/concat/locales/en.json
+--- a/engine/crates/concat/locales/en.json
++++ b/engine/crates/concat/locales/en.json
+@@ -37,8 +37,8 @@
+   "Apply": "Apply",
+   "Audio": "Audio",
+   "audio effect": "audio effect",
++  "Audio Effects": "Audio Effects",
+   "Audio effects": "Audio effects",
+-  "Audio Effects": "Audio Effects",
+   "Auto": "Auto",
+   "auto": "auto",
+   "Auto captions": "Auto captions",
+@@ -52,8 +52,8 @@
+   "Bits": "Bits",
+   "Black & White": "Black & White",
+   "Blend": "Blend",
++  "Blue screen": "Blue screen",
+   "Blue Screen": "Blue Screen",
+-  "Blue screen": "Blue screen",
+   "Blur": "Blur",
+   "Body": "Body",
+   "Bold": "Bold",
+@@ -82,11 +82,13 @@
+   "centred": "centred",
+   "Change pitch with speed": "Change pitch with speed",
+   "Change what this panel shows, or drag it onto another": "Change what this panel shows, or drag it onto another",
++  "Chapter card": "Chapter card",
+   "Chinese": "Chinese",
+   "Chipmunk": "Chipmunk",
+   "Choose a folder": "Choose a folder",
+   "Choose where the project folder should go": "Choose where the project folder should go",
+   "Choose…": "Choose…",
++  "Classic": "Classic",
+   "Clean": "Clean",
+   "Clear strokes": "Clear strokes",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.",
+@@ -96,7 +98,6 @@
+   "Color": "Color",
+   "Colour": "Colour",
+   "Combo": "Combo",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Content",
+   "CONTENTS": "CONTENTS",
+   "Contents": "Contents",
+@@ -106,6 +107,9 @@
+   "Copied": "Copied",
+   "Copy": "Copy",
+   "Copy system information": "Copy system information",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "Could not save: {0}",
+   "Could not show the file: {0}": "Could not show the file: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Cutout",
+   "Dancing grain, the texture of film stock.": "Dancing grain, the texture of film stock.",
+   "Dark": "Dark",
++  "Dark plate": "Dark plate",
+   "Darken": "Darken",
+   "Darkened corners that draw the eye to the middle.": "Darkened corners that draw the eye to the middle.",
+   "Decay": "Decay",
+@@ -149,6 +154,7 @@
+   "Duration": "Duration",
+   "Echo": "Echo",
+   "Edit": "Edit",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "effect",
+   "Effect library": "Effect library",
+   "Effects": "Effects",
+@@ -180,8 +186,8 @@
+   "File": "File",
+   "Fill": "Fill",
+   "Film Grain": "Film Grain",
++  "filter": "filter",
+   "Filter": "Filter",
+-  "filter": "filter",
+   "Filter library": "Filter library",
+   "Filters": "Filters",
+   "Finalising file": "Finalising file",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Gaussian Blur",
+   "General": "General",
+   "Generate captions": "Generate captions",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Generate speech",
+   "Generating voice": "Generating voice",
+   "Glow": "Glow",
+@@ -224,6 +231,7 @@
+   "Images": "Images",
+   "Import media": "Import media",
+   "Import media…": "Import media…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "Imported 1 file",
+   "Imported {0} files": "Imported {0} files",
+   "Importing…": "Importing…",
+@@ -271,6 +279,7 @@
+   "Master": "Master",
+   "Media": "Media",
+   "Medium": "Medium",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimal",
+   "Mirror": "Mirror",
+   "Mixing audio": "Mixing audio",
+@@ -295,8 +304,9 @@
+   "Neon": "Neon",
+   "New project": "New project",
+   "Next frame": "Next frame",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "No templates yet. Mark media as slots, then save this project as a template.",
+   "No voice to read with": "No voice to read with",
+   "Noise": "Noise",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Nothing to read yet",
+   "Nothing under the playhead": "Nothing under the playhead",
+   "Nothing was said in that clip": "Nothing was said in that clip",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Off",
+   "off": "off",
+   "One repeat, fading.": "One repeat, fading.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "One title per phrase spoken, cut to the words' own timing, on the first lane with room.",
+   "Only panel": "Only panel",
+   "Opacity": "Opacity",
+   "Operating system": "Operating system",
++  "Original": "Original",
+   "Other": "Other",
+   "Out": "Out",
+   "Outline": "Outline",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Paint on the monitor",
+   "Paste": "Paste",
+   "Pause": "Pause",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Pick an effect or filter from the library",
+   "Pitch": "Pitch",
+   "Pixelate": "Pixelate",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Sharpen",
+   "Shifts the picture towards candlelight.": "Shifts the picture towards candlelight.",
+   "Shifts the picture towards daylight shade.": "Shifts the picture towards daylight shade.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Show in folder",
+   "Show {0}": "Show {0}",
+   "Silent": "Silent",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Split at playhead (S, or ⌘B for every clip)",
+   "Stone and height: reflections that take a while to arrive.": "Stone and height: reflections that take a while to arrive.",
+   "Strength": "Strength",
++  "Style": "Style",
+   "Stylize": "Stylize",
+   "Subtitle": "Subtitle",
+   "Summary": "Summary",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Text to speech…",
+   "The bulge of a very wide lens.": "The bulge of a very wide lens.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "The clip is no longer on the timeline",
+   "The early reflections of a room.": "The early reflections of a room.",
+   "The left half, reflected onto the right.": "The left half, reflected onto the right.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "Unlock {0}",
+   "Unmute {0}": "Unmute {0}",
+   "Unpacking…": "Unpacking…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Untitled project",
+   "Up or down by semitones, the length untouched.": "Up or down by semitones, the length untouched.",
+   "Vertical": "Vertical",
+@@ -503,12 +520,15 @@
+   "Warm": "Warm",
+   "Where should the project folder go?": "Where should the project folder go?",
+   "Width": "Width",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "yesterday",
++  "Zoom in": "Zoom in",
+   "Zoom In": "Zoom In",
+-  "Zoom in": "Zoom in",
+   "Zoom out": "Zoom out",
+   "Zoom Out": "Zoom Out",
+   "Zoom to fit": "Zoom to fit",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "{0} days ago",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} installed · {1} MB on disk",
+diff --git a/engine/crates/concat/locales/es.json b/engine/crates/concat/locales/es.json
+--- a/engine/crates/concat/locales/es.json
++++ b/engine/crates/concat/locales/es.json
+@@ -37,8 +37,8 @@
+   "Apply": "Aplicar",
+   "Audio": "Audio",
+   "audio effect": "efecto de audio",
++  "Audio Effects": "Efectos de audio",
+   "Audio effects": "Efectos de audio",
+-  "Audio Effects": "Efectos de audio",
+   "Auto": "Auto",
+   "auto": "auto",
+   "Auto captions": "Subtítulos automáticos",
+@@ -52,8 +52,8 @@
+   "Bits": "Bits",
+   "Black & White": "Blanco y negro",
+   "Blend": "Fusión",
++  "Blue screen": "Pantalla azul",
+   "Blue Screen": "Pantalla azul",
+-  "Blue screen": "Pantalla azul",
+   "Blur": "Desenfoque",
+   "Body": "Cuerpo",
+   "Bold": "Negrita",
+@@ -82,11 +82,13 @@
+   "centred": "centrado",
+   "Change pitch with speed": "Cambiar el tono con la velocidad",
+   "Change what this panel shows, or drag it onto another": "Cambia lo que muestra este panel o arrástralo sobre otro",
++  "Chapter card": "Chapter card",
+   "Chinese": "Chino",
+   "Chipmunk": "Ardilla",
+   "Choose a folder": "Elige una carpeta",
+   "Choose where the project folder should go": "Elige dónde irá la carpeta del proyecto",
+   "Choose…": "Elegir…",
++  "Classic": "Classic",
+   "Clean": "Limpieza",
+   "Clear strokes": "Borrar trazos",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Quita la sala de una grabación: retumbo, siseo, sibilancia y nivel irregular.",
+@@ -96,7 +98,6 @@
+   "Color": "Color",
+   "Colour": "Color",
+   "Combo": "Combo",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Contenido",
+   "CONTENTS": "CONTENIDO",
+   "Contents": "Contenido",
+@@ -106,6 +107,9 @@
+   "Copied": "Copiado",
+   "Copy": "Copiar",
+   "Copy system information": "Copiar información del sistema",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "No se pudo guardar: {0}",
+   "Could not show the file: {0}": "No se pudo mostrar el archivo: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Recorte",
+   "Dancing grain, the texture of film stock.": "Grano en movimiento, la textura de la película.",
+   "Dark": "Oscuro",
++  "Dark plate": "Dark plate",
+   "Darken": "Oscurecer",
+   "Darkened corners that draw the eye to the middle.": "Esquinas oscurecidas que llevan la mirada al centro.",
+   "Decay": "Decaimiento",
+@@ -149,6 +154,7 @@
+   "Duration": "Duración",
+   "Echo": "Eco",
+   "Edit": "Edición",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "efecto",
+   "Effect library": "Biblioteca de efectos",
+   "Effects": "Efectos",
+@@ -180,8 +186,8 @@
+   "File": "Archivo",
+   "Fill": "Relleno",
+   "Film Grain": "Grano de película",
++  "filter": "filtro",
+   "Filter": "Filtro",
+-  "filter": "filtro",
+   "Filter library": "Biblioteca de filtros",
+   "Filters": "Filtros",
+   "Finalising file": "Finalizando el archivo",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Desenfoque gaussiano",
+   "General": "General",
+   "Generate captions": "Generar subtítulos",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Generar voz",
+   "Generating voice": "Generando voz",
+   "Glow": "Resplandor",
+@@ -224,6 +231,7 @@
+   "Images": "Imágenes",
+   "Import media": "Importar medios",
+   "Import media…": "Importar medios…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "1 archivo importado",
+   "Imported {0} files": "{0} archivos importados",
+   "Importing…": "Importando…",
+@@ -271,6 +279,7 @@
+   "Master": "Máster",
+   "Media": "Medios",
+   "Medium": "Mediano",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimalista",
+   "Mirror": "Espejo",
+   "Mixing audio": "Mezclando el audio",
+@@ -295,8 +304,9 @@
+   "Neon": "Neón",
+   "New project": "Nuevo proyecto",
+   "Next frame": "Fotograma siguiente",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Aún no hay plantillas. Marca medios como huecos y guarda este proyecto como plantilla.",
+   "No voice to read with": "No hay voz con la que leer",
+   "Noise": "Ruido",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Aún no hay nada que leer",
+   "Nothing under the playhead": "Nada bajo el cabezal",
+   "Nothing was said in that clip": "No se dijo nada en ese clip",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Desactivado",
+   "off": "desactivado",
+   "One repeat, fading.": "Una repetición que se desvanece.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Un título por frase hablada, ajustado al ritmo de las palabras, en la primera pista con espacio.",
+   "Only panel": "Único panel",
+   "Opacity": "Opacidad",
+   "Operating system": "Sistema operativo",
++  "Original": "Original",
+   "Other": "Otros",
+   "Out": "Salida",
+   "Outline": "Contorno",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Pintar en el monitor",
+   "Paste": "Pegar",
+   "Pause": "Pausa",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Elige un efecto o filtro de la biblioteca",
+   "Pitch": "Tono",
+   "Pixelate": "Pixelar",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Enfocar",
+   "Shifts the picture towards candlelight.": "Lleva la imagen hacia la luz de las velas.",
+   "Shifts the picture towards daylight shade.": "Lleva la imagen hacia la sombra de la luz del día.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Mostrar en la carpeta",
+   "Show {0}": "Mostrar {0}",
+   "Silent": "Silencio",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Dividir en el cabezal (S, o ⌘B para todos los clips)",
+   "Stone and height: reflections that take a while to arrive.": "Piedra y altura: reflexiones que tardan en llegar.",
+   "Strength": "Intensidad",
++  "Style": "Style",
+   "Stylize": "Estilizar",
+   "Subtitle": "Subtítulo",
+   "Summary": "Resumen",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Texto a voz…",
+   "The bulge of a very wide lens.": "La curvatura de un objetivo muy angular.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "La cadena va de arriba abajo: reordénala con las flechas. El ojo omite un eslabón sin perder los valores que ajustaste.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "El clip ya no está en la línea de tiempo",
+   "The early reflections of a room.": "Las primeras reflexiones de una habitación.",
+   "The left half, reflected onto the right.": "La mitad izquierda, reflejada sobre la derecha.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "Desbloquear {0}",
+   "Unmute {0}": "Activar el sonido de {0}",
+   "Unpacking…": "Desempaquetando…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Proyecto sin título",
+   "Up or down by semitones, the length untouched.": "Arriba o abajo por semitonos, sin tocar la duración.",
+   "Vertical": "Vertical",
+@@ -503,12 +520,15 @@
+   "Warm": "Cálido",
+   "Where should the project folder go?": "¿Dónde irá la carpeta del proyecto?",
+   "Width": "Ancho",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "ayer",
++  "Zoom in": "Acercar",
+   "Zoom In": "Acercar",
+-  "Zoom in": "Acercar",
+   "Zoom out": "Alejar",
+   "Zoom Out": "Alejar",
+   "Zoom to fit": "Ajustar a la vista",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "hace {0} días",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} instalados · {1} MB en disco",
+diff --git a/engine/crates/concat/locales/fr.json b/engine/crates/concat/locales/fr.json
+--- a/engine/crates/concat/locales/fr.json
++++ b/engine/crates/concat/locales/fr.json
+@@ -37,8 +37,8 @@
+   "Apply": "Appliquer",
+   "Audio": "Audio",
+   "audio effect": "effet audio",
++  "Audio Effects": "Effets audio",
+   "Audio effects": "Effets audio",
+-  "Audio Effects": "Effets audio",
+   "Auto": "Auto",
+   "auto": "auto",
+   "Auto captions": "Sous-titres automatiques",
+@@ -52,8 +52,8 @@
+   "Bits": "Bits",
+   "Black & White": "Noir et blanc",
+   "Blend": "Fusion",
++  "Blue screen": "Fond bleu",
+   "Blue Screen": "Fond bleu",
+-  "Blue screen": "Fond bleu",
+   "Blur": "Flou",
+   "Body": "Corps",
+   "Bold": "Gras",
+@@ -82,11 +82,13 @@
+   "centred": "centré",
+   "Change pitch with speed": "Changer la hauteur avec la vitesse",
+   "Change what this panel shows, or drag it onto another": "Changez ce que montre ce panneau, ou glissez-le sur un autre",
++  "Chapter card": "Chapter card",
+   "Chinese": "Chinois",
+   "Chipmunk": "Écureuil",
+   "Choose a folder": "Choisir un dossier",
+   "Choose where the project folder should go": "Choisissez où placer le dossier du projet",
+   "Choose…": "Choisir…",
++  "Classic": "Classic",
+   "Clean": "Nettoyage",
+   "Clear strokes": "Effacer les traits",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Retire la pièce d'un enregistrement : grondement, souffle, sifflantes et niveau irrégulier.",
+@@ -96,7 +98,6 @@
+   "Color": "Couleur",
+   "Colour": "Couleur",
+   "Combo": "Combo",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Contenu",
+   "CONTENTS": "CONTENU",
+   "Contents": "Contenu",
+@@ -106,6 +107,9 @@
+   "Copied": "Copié",
+   "Copy": "Copier",
+   "Copy system information": "Copier les informations système",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "Enregistrement impossible : {0}",
+   "Could not show the file: {0}": "Impossible d'afficher le fichier : {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Détourage",
+   "Dancing grain, the texture of film stock.": "Un grain qui danse, la texture de la pellicule.",
+   "Dark": "Sombre",
++  "Dark plate": "Dark plate",
+   "Darken": "Obscurcir",
+   "Darkened corners that draw the eye to the middle.": "Des coins assombris qui attirent l'œil vers le centre.",
+   "Decay": "Déclin",
+@@ -149,6 +154,7 @@
+   "Duration": "Durée",
+   "Echo": "Écho",
+   "Edit": "Édition",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "effet",
+   "Effect library": "Bibliothèque d'effets",
+   "Effects": "Effets",
+@@ -180,8 +186,8 @@
+   "File": "Fichier",
+   "Fill": "Remplissage",
+   "Film Grain": "Grain de film",
++  "filter": "filtre",
+   "Filter": "Filtre",
+-  "filter": "filtre",
+   "Filter library": "Bibliothèque de filtres",
+   "Filters": "Filtres",
+   "Finalising file": "Finalisation du fichier",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Flou gaussien",
+   "General": "Général",
+   "Generate captions": "Générer les sous-titres",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Générer la voix",
+   "Generating voice": "Génération de la voix",
+   "Glow": "Lueur",
+@@ -224,6 +231,7 @@
+   "Images": "Images",
+   "Import media": "Importer des médias",
+   "Import media…": "Importer des médias…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "1 fichier importé",
+   "Imported {0} files": "{0} fichiers importés",
+   "Importing…": "Importation…",
+@@ -271,6 +279,7 @@
+   "Master": "Master",
+   "Media": "Médias",
+   "Medium": "Moyen",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimal",
+   "Mirror": "Miroir",
+   "Mixing audio": "Mixage de l'audio",
+@@ -295,8 +304,9 @@
+   "Neon": "Néon",
+   "New project": "Nouveau projet",
+   "Next frame": "Image suivante",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Pas encore de modèle. Marquez des médias comme emplacements, puis enregistrez ce projet comme modèle.",
+   "No voice to read with": "Aucune voix pour lire",
+   "Noise": "Bruit",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Rien à lire pour l'instant",
+   "Nothing under the playhead": "Rien sous la tête de lecture",
+   "Nothing was said in that clip": "Rien n'a été dit dans ce clip",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Désactivé",
+   "off": "désactivé",
+   "One repeat, fading.": "Une répétition qui s'estompe.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Un titre par phrase prononcée, calé sur le rythme des mots, sur la première piste libre.",
+   "Only panel": "Seul panneau",
+   "Opacity": "Opacité",
+   "Operating system": "Système d'exploitation",
++  "Original": "Original",
+   "Other": "Autres",
+   "Out": "Sortie",
+   "Outline": "Contour",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Peindre sur le moniteur",
+   "Paste": "Coller",
+   "Pause": "Pause",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Choisissez un effet ou un filtre dans la bibliothèque",
+   "Pitch": "Hauteur",
+   "Pixelate": "Pixeliser",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Netteté",
+   "Shifts the picture towards candlelight.": "Tire l'image vers la lumière des bougies.",
+   "Shifts the picture towards daylight shade.": "Tire l'image vers l'ombre du jour.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Afficher dans le dossier",
+   "Show {0}": "Afficher {0}",
+   "Silent": "Silence",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Couper à la tête de lecture (S, ou ⌘B pour tous les clips)",
+   "Stone and height: reflections that take a while to arrive.": "Pierre et hauteur : des réflexions qui mettent du temps à arriver.",
+   "Strength": "Intensité",
++  "Style": "Style",
+   "Stylize": "Styliser",
+   "Subtitle": "Sous-titre",
+   "Summary": "Résumé",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Synthèse vocale…",
+   "The bulge of a very wide lens.": "Le bombé d'un objectif très grand-angle.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "La chaîne va de haut en bas : réordonnez-la avec les chevrons. L'œil contourne un maillon sans perdre les valeurs que vous y avez réglées.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "Le clip n'est plus sur la timeline",
+   "The early reflections of a room.": "Les premières réflexions d'une pièce.",
+   "The left half, reflected onto the right.": "La moitié gauche, reflétée sur la droite.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "Déverrouiller {0}",
+   "Unmute {0}": "Rétablir le son de {0}",
+   "Unpacking…": "Décompression…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Projet sans titre",
+   "Up or down by semitones, the length untouched.": "Vers le haut ou le bas par demi-tons, sans toucher à la durée.",
+   "Vertical": "Vertical",
+@@ -503,12 +520,15 @@
+   "Warm": "Chaud",
+   "Where should the project folder go?": "Où placer le dossier du projet ?",
+   "Width": "Largeur",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "hier",
++  "Zoom in": "Zoom avant",
+   "Zoom In": "Zoom avant",
+-  "Zoom in": "Zoom avant",
+   "Zoom out": "Zoom arrière",
+   "Zoom Out": "Zoom arrière",
+   "Zoom to fit": "Ajuster à la vue",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "il y a {0} jours",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} installés · {1} Mo sur le disque",
+diff --git a/engine/crates/concat/locales/it.json b/engine/crates/concat/locales/it.json
+--- a/engine/crates/concat/locales/it.json
++++ b/engine/crates/concat/locales/it.json
+@@ -37,8 +37,8 @@
+   "Apply": "Applica",
+   "Audio": "Audio",
+   "audio effect": "effetto audio",
++  "Audio Effects": "Effetti audio",
+   "Audio effects": "Effetti audio",
+-  "Audio Effects": "Effetti audio",
+   "Auto": "Auto",
+   "auto": "auto",
+   "Auto captions": "Sottotitoli automatici",
+@@ -52,8 +52,8 @@
+   "Bits": "Bit",
+   "Black & White": "Bianco e nero",
+   "Blend": "Fusione",
++  "Blue screen": "Blue screen",
+   "Blue Screen": "Blue screen",
+-  "Blue screen": "Blue screen",
+   "Blur": "Sfocatura",
+   "Body": "Corpo",
+   "Bold": "Grassetto",
+@@ -82,11 +82,13 @@
+   "centred": "centrato",
+   "Change pitch with speed": "Cambia intonazione con la velocità",
+   "Change what this panel shows, or drag it onto another": "Cambia cosa mostra questo pannello, o trascinalo su un altro",
++  "Chapter card": "Chapter card",
+   "Chinese": "Cinese",
+   "Chipmunk": "Scoiattolo",
+   "Choose a folder": "Scegli una cartella",
+   "Choose where the project folder should go": "Scegli dove mettere la cartella del progetto",
+   "Choose…": "Scegli…",
++  "Classic": "Classic",
+   "Clean": "Pulizia",
+   "Clear strokes": "Cancella i tratti",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Toglie la stanza da una registrazione: rombo, fruscio, sibilanti e livello irregolare.",
+@@ -96,7 +98,6 @@
+   "Color": "Colore",
+   "Colour": "Colore",
+   "Combo": "Combo",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Contenuto",
+   "CONTENTS": "CONTENUTO",
+   "Contents": "Contenuto",
+@@ -106,6 +107,9 @@
+   "Copied": "Copiato",
+   "Copy": "Copia",
+   "Copy system information": "Copia informazioni di sistema",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "Impossibile salvare: {0}",
+   "Could not show the file: {0}": "Impossibile mostrare il file: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Ritaglio",
+   "Dancing grain, the texture of film stock.": "Grana che danza, la texture della pellicola.",
+   "Dark": "Scuro",
++  "Dark plate": "Dark plate",
+   "Darken": "Scurisci",
+   "Darkened corners that draw the eye to the middle.": "Angoli scuriti che portano l'occhio al centro.",
+   "Decay": "Decadimento",
+@@ -149,6 +154,7 @@
+   "Duration": "Durata",
+   "Echo": "Eco",
+   "Edit": "Modifica",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "effetto",
+   "Effect library": "Libreria effetti",
+   "Effects": "Effetti",
+@@ -180,8 +186,8 @@
+   "File": "File",
+   "Fill": "Riempimento",
+   "Film Grain": "Grana pellicola",
++  "filter": "filtro",
+   "Filter": "Filtro",
+-  "filter": "filtro",
+   "Filter library": "Libreria filtri",
+   "Filters": "Filtri",
+   "Finalising file": "Finalizzazione del file",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Sfocatura gaussiana",
+   "General": "Generale",
+   "Generate captions": "Genera sottotitoli",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Genera voce",
+   "Generating voice": "Generazione della voce",
+   "Glow": "Bagliore",
+@@ -224,6 +231,7 @@
+   "Images": "Immagini",
+   "Import media": "Importa media",
+   "Import media…": "Importa media…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "1 file importato",
+   "Imported {0} files": "{0} file importati",
+   "Importing…": "Importazione…",
+@@ -271,6 +279,7 @@
+   "Master": "Master",
+   "Media": "Media",
+   "Medium": "Media",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimale",
+   "Mirror": "Specchio",
+   "Mixing audio": "Mixaggio dell'audio",
+@@ -295,8 +304,9 @@
+   "Neon": "Neon",
+   "New project": "Nuovo progetto",
+   "Next frame": "Fotogramma successivo",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Ancora nessun modello. Segna dei media come segnaposto, poi salva questo progetto come modello.",
+   "No voice to read with": "Nessuna voce con cui leggere",
+   "Noise": "Rumore",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Ancora niente da leggere",
+   "Nothing under the playhead": "Niente sotto la testina",
+   "Nothing was said in that clip": "In quella clip non è stato detto nulla",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Disattivato",
+   "off": "disattivato",
+   "One repeat, fading.": "Una ripetizione che sfuma.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Un titolo per ogni frase pronunciata, tagliato sul ritmo delle parole, sulla prima traccia libera.",
+   "Only panel": "Unico pannello",
+   "Opacity": "Opacità",
+   "Operating system": "Sistema operativo",
++  "Original": "Original",
+   "Other": "Altro",
+   "Out": "Uscita",
+   "Outline": "Contorno",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Dipingi sul monitor",
+   "Paste": "Incolla",
+   "Pause": "Pausa",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Scegli un effetto o un filtro dalla libreria",
+   "Pitch": "Intonazione",
+   "Pixelate": "Pixel",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Nitidezza",
+   "Shifts the picture towards candlelight.": "Sposta l'immagine verso la luce di candela.",
+   "Shifts the picture towards daylight shade.": "Sposta l'immagine verso l'ombra della luce diurna.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Mostra nella cartella",
+   "Show {0}": "Mostra {0}",
+   "Silent": "Silenzio",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Dividi alla testina (S, o ⌘B per tutte le clip)",
+   "Stone and height: reflections that take a while to arrive.": "Pietra e altezza: riflessioni che tardano ad arrivare.",
+   "Strength": "Intensità",
++  "Style": "Style",
+   "Stylize": "Stilizza",
+   "Subtitle": "Sottotitolo",
+   "Summary": "Riepilogo",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Sintesi vocale…",
+   "The bulge of a very wide lens.": "La curvatura di un obiettivo molto grandangolare.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "La catena va dall'alto in basso: riordinala con le frecce. L'occhio bypassa un anello senza perdere i valori che hai impostato.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "La clip non è più sulla timeline",
+   "The early reflections of a room.": "Le prime riflessioni di una stanza.",
+   "The left half, reflected onto the right.": "La metà sinistra, riflessa sulla destra.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "Sblocca {0}",
+   "Unmute {0}": "Riattiva il suono di {0}",
+   "Unpacking…": "Estrazione…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Progetto senza titolo",
+   "Up or down by semitones, the length untouched.": "Su o giù per semitoni, senza toccare la durata.",
+   "Vertical": "Verticale",
+@@ -503,12 +520,15 @@
+   "Warm": "Caldo",
+   "Where should the project folder go?": "Dove mettere la cartella del progetto?",
+   "Width": "Larghezza",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "ieri",
++  "Zoom in": "Ingrandisci",
+   "Zoom In": "Zoom in avanti",
+-  "Zoom in": "Ingrandisci",
+   "Zoom out": "Riduci",
+   "Zoom Out": "Zoom indietro",
+   "Zoom to fit": "Adatta alla vista",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "{0} giorni fa",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} installati · {1} MB su disco",
+diff --git a/engine/crates/concat/locales/ja.json b/engine/crates/concat/locales/ja.json
+--- a/engine/crates/concat/locales/ja.json
++++ b/engine/crates/concat/locales/ja.json
+@@ -37,8 +37,8 @@
+   "Apply": "適用",
+   "Audio": "オーディオ",
+   "audio effect": "オーディオエフェクト",
++  "Audio Effects": "オーディオエフェクト",
+   "Audio effects": "オーディオエフェクト",
+-  "Audio Effects": "オーディオエフェクト",
+   "Auto": "自動",
+   "auto": "自動",
+   "Auto captions": "自動字幕",
+@@ -52,8 +52,8 @@
+   "Bits": "ビット",
+   "Black & White": "白黒",
+   "Blend": "ブレンド",
++  "Blue screen": "ブルースクリーン",
+   "Blue Screen": "ブルースクリーン",
+-  "Blue screen": "ブルースクリーン",
+   "Blur": "ぼかし",
+   "Body": "ボディ",
+   "Bold": "太字",
+@@ -82,11 +82,13 @@
+   "centred": "中央",
+   "Change pitch with speed": "速度に合わせてピッチを変える",
+   "Change what this panel shows, or drag it onto another": "このパネルの表示内容を変えるか、別のパネルへドラッグします",
++  "Chapter card": "Chapter card",
+   "Chinese": "中国語",
+   "Chipmunk": "チップマンク",
+   "Choose a folder": "フォルダを選択",
+   "Choose where the project folder should go": "プロジェクトフォルダの保存先を選んでください",
+   "Choose…": "選択…",
++  "Classic": "Classic",
+   "Clean": "クリーン",
+   "Clear strokes": "ストロークを消去",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "録音から部屋の響きを取り除きます：低いうねり、ヒス、歯擦音、ばらついたレベル。",
+@@ -96,7 +98,6 @@
+   "Color": "カラー",
+   "Colour": "カラー",
+   "Combo": "コンボ",
+-  "Concat {0}": "Concat {0}",
+   "Content": "内容",
+   "CONTENTS": "内容",
+   "Contents": "内容",
+@@ -106,6 +107,9 @@
+   "Copied": "コピーしました",
+   "Copy": "コピー",
+   "Copy system information": "システム情報をコピー",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "保存できませんでした：{0}",
+   "Could not show the file: {0}": "ファイルを表示できませんでした：{0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "切り抜き",
+   "Dancing grain, the texture of film stock.": "揺れる粒子、フィルムの質感。",
+   "Dark": "ダーク",
++  "Dark plate": "Dark plate",
+   "Darken": "比較（暗）",
+   "Darkened corners that draw the eye to the middle.": "四隅を暗くして視線を中央に集めます。",
+   "Decay": "減衰",
+@@ -149,6 +154,7 @@
+   "Duration": "長さ",
+   "Echo": "エコー",
+   "Edit": "編集",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "エフェクト",
+   "Effect library": "エフェクトライブラリ",
+   "Effects": "エフェクト",
+@@ -180,8 +186,8 @@
+   "File": "ファイル",
+   "Fill": "塗り",
+   "Film Grain": "フィルムグレイン",
++  "filter": "フィルター",
+   "Filter": "フィルター",
+-  "filter": "フィルター",
+   "Filter library": "フィルターライブラリ",
+   "Filters": "フィルター",
+   "Finalising file": "ファイルを仕上げています",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "ガウスぼかし",
+   "General": "一般",
+   "Generate captions": "字幕を生成",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "音声を生成",
+   "Generating voice": "音声を生成中",
+   "Glow": "グロー",
+@@ -224,6 +231,7 @@
+   "Images": "画像",
+   "Import media": "メディアを読み込む",
+   "Import media…": "メディアを読み込む…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "1 個のファイルを読み込みました",
+   "Imported {0} files": "{0} 個のファイルを読み込みました",
+   "Importing…": "読み込み中…",
+@@ -271,6 +279,7 @@
+   "Master": "マスター",
+   "Media": "メディア",
+   "Medium": "中",
++  "Minecraft": "Minecraft",
+   "Minimal": "ミニマル",
+   "Mirror": "ミラー",
+   "Mixing audio": "オーディオをミックス中",
+@@ -295,8 +304,9 @@
+   "Neon": "ネオン",
+   "New project": "新規プロジェクト",
+   "Next frame": "次のフレーム",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "テンプレートはまだありません。メディアをスロットに指定して、このプロジェクトをテンプレートとして保存してください。",
+   "No voice to read with": "読み上げる声がありません",
+   "Noise": "ノイズ",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "読み上げる内容がまだありません",
+   "Nothing under the playhead": "再生ヘッドの下に何もありません",
+   "Nothing was said in that clip": "そのクリップには発話がありませんでした",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "オフ",
+   "off": "オフ",
+   "One repeat, fading.": "一回の繰り返しがフェードします。",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "発話されたフレーズごとにタイトルを一つ、言葉のタイミングどおりに、空いている最初のレーンへ。",
+   "Only panel": "唯一のパネル",
+   "Opacity": "不透明度",
+   "Operating system": "オペレーティングシステム",
++  "Original": "Original",
+   "Other": "その他",
+   "Out": "アウト",
+   "Outline": "縁取り",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "モニター上で塗る",
+   "Paste": "ペースト",
+   "Pause": "一時停止",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "ライブラリからエフェクトまたはフィルターを選んでください",
+   "Pitch": "ピッチ",
+   "Pixelate": "モザイク",
+@@ -413,6 +425,7 @@
+   "Sharpen": "シャープ",
+   "Shifts the picture towards candlelight.": "画像をろうそくの光の色へ寄せます。",
+   "Shifts the picture towards daylight shade.": "画像を日陰の色へ寄せます。",
++  "Short phrases": "Short phrases",
+   "Show in folder": "フォルダで表示",
+   "Show {0}": "{0} を表示",
+   "Silent": "無音",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "再生ヘッドで分割（S、すべてのクリップは ⌘B）",
+   "Stone and height: reflections that take a while to arrive.": "石と高さ：届くまでに時間のかかる反射。",
+   "Strength": "強さ",
++  "Style": "Style",
+   "Stylize": "スタイライズ",
+   "Subtitle": "サブタイトル",
+   "Summary": "概要",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "テキスト読み上げ…",
+   "The bulge of a very wide lens.": "超広角レンズの膨らみ。",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "チェーンは上から下へ処理されます。矢印で並べ替えてください。目のアイコンは設定値を失わずに一つの項目をバイパスします。",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "そのクリップはもうタイムラインにありません",
+   "The early reflections of a room.": "部屋の初期反射。",
+   "The left half, reflected onto the right.": "左半分を右に映します。",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "{0} のロックを解除",
+   "Unmute {0}": "{0} のミュートを解除",
+   "Unpacking…": "展開中…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "無題のプロジェクト",
+   "Up or down by semitones, the length untouched.": "半音単位で上下させ、長さは変えません。",
+   "Vertical": "垂直",
+@@ -503,12 +520,15 @@
+   "Warm": "ウォーム",
+   "Where should the project folder go?": "プロジェクトフォルダをどこに作成しますか？",
+   "Width": "幅",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "昨日",
++  "Zoom in": "拡大",
+   "Zoom In": "ズームイン",
+-  "Zoom in": "拡大",
+   "Zoom out": "縮小",
+   "Zoom Out": "ズームアウト",
+   "Zoom to fit": "全体を表示",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "{0} 日前",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} 個インストール済み · ディスク上 {1} MB",
+diff --git a/engine/crates/concat/locales/ko.json b/engine/crates/concat/locales/ko.json
+--- a/engine/crates/concat/locales/ko.json
++++ b/engine/crates/concat/locales/ko.json
+@@ -37,8 +37,8 @@
+   "Apply": "적용",
+   "Audio": "오디오",
+   "audio effect": "오디오 효과",
++  "Audio Effects": "오디오 효과",
+   "Audio effects": "오디오 효과",
+-  "Audio Effects": "오디오 효과",
+   "Auto": "자동",
+   "auto": "자동",
+   "Auto captions": "자동 자막",
+@@ -52,8 +52,8 @@
+   "Bits": "비트",
+   "Black & White": "흑백",
+   "Blend": "블렌드",
++  "Blue screen": "블루 스크린",
+   "Blue Screen": "블루 스크린",
+-  "Blue screen": "블루 스크린",
+   "Blur": "흐림",
+   "Body": "바디",
+   "Bold": "굵게",
+@@ -82,11 +82,13 @@
+   "centred": "가운데",
+   "Change pitch with speed": "속도에 따라 피치 변경",
+   "Change what this panel shows, or drag it onto another": "이 패널의 내용을 바꾸거나 다른 패널 위로 끌어다 놓으세요",
++  "Chapter card": "Chapter card",
+   "Chinese": "중국어",
+   "Chipmunk": "다람쥐",
+   "Choose a folder": "폴더 선택",
+   "Choose where the project folder should go": "프로젝트 폴더를 둘 위치를 선택하세요",
+   "Choose…": "선택…",
++  "Classic": "Classic",
+   "Clean": "정리",
+   "Clear strokes": "선 지우기",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "녹음에서 공간의 울림을 걷어냅니다: 저역 울림, 히스, 치찰음, 고르지 않은 레벨.",
+@@ -96,7 +98,6 @@
+   "Color": "색상",
+   "Colour": "색상",
+   "Combo": "콤보",
+-  "Concat {0}": "Concat {0}",
+   "Content": "내용",
+   "CONTENTS": "내용",
+   "Contents": "내용",
+@@ -106,6 +107,9 @@
+   "Copied": "복사됨",
+   "Copy": "복사",
+   "Copy system information": "시스템 정보 복사",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "저장할 수 없습니다: {0}",
+   "Could not show the file: {0}": "파일을 표시할 수 없습니다: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "컷아웃",
+   "Dancing grain, the texture of film stock.": "살아 움직이는 입자, 필름의 질감.",
+   "Dark": "다크",
++  "Dark plate": "Dark plate",
+   "Darken": "어둡게",
+   "Darkened corners that draw the eye to the middle.": "시선을 가운데로 모으는 어두운 모서리.",
+   "Decay": "감쇠",
+@@ -149,6 +154,7 @@
+   "Duration": "길이",
+   "Echo": "에코",
+   "Edit": "편집",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "효과",
+   "Effect library": "효과 라이브러리",
+   "Effects": "효과",
+@@ -180,8 +186,8 @@
+   "File": "파일",
+   "Fill": "채우기",
+   "Film Grain": "필름 그레인",
++  "filter": "필터",
+   "Filter": "필터",
+-  "filter": "필터",
+   "Filter library": "필터 라이브러리",
+   "Filters": "필터",
+   "Finalising file": "파일 마무리 중",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "가우시안 흐림",
+   "General": "일반",
+   "Generate captions": "자막 생성",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "음성 생성",
+   "Generating voice": "음성 생성 중",
+   "Glow": "글로우",
+@@ -224,6 +231,7 @@
+   "Images": "이미지",
+   "Import media": "미디어 가져오기",
+   "Import media…": "미디어 가져오기…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "파일 1개를 가져왔습니다",
+   "Imported {0} files": "파일 {0}개를 가져왔습니다",
+   "Importing…": "가져오는 중…",
+@@ -271,6 +279,7 @@
+   "Master": "마스터",
+   "Media": "미디어",
+   "Medium": "중간",
++  "Minecraft": "Minecraft",
+   "Minimal": "미니멀",
+   "Mirror": "미러",
+   "Mixing audio": "오디오 믹싱 중",
+@@ -295,8 +304,9 @@
+   "Neon": "네온",
+   "New project": "새 프로젝트",
+   "Next frame": "다음 프레임",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "아직 템플릿이 없습니다. 미디어를 슬롯으로 표시한 뒤 이 프로젝트를 템플릿으로 저장하세요.",
+   "No voice to read with": "읽어 줄 목소리가 없습니다",
+   "Noise": "노이즈",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "아직 읽을 내용이 없습니다",
+   "Nothing under the playhead": "재생 헤드 아래에 아무것도 없습니다",
+   "Nothing was said in that clip": "그 클립에는 말소리가 없습니다",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "끔",
+   "off": "끔",
+   "One repeat, fading.": "한 번 반복하며 사라집니다.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "말한 구절마다 자막 하나씩, 말의 타이밍에 맞춰, 자리가 있는 첫 레인에 놓습니다.",
+   "Only panel": "유일한 패널",
+   "Opacity": "불투명도",
+   "Operating system": "운영 체제",
++  "Original": "Original",
+   "Other": "기타",
+   "Out": "아웃",
+   "Outline": "외곽선",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "모니터에 칠하기",
+   "Paste": "붙여넣기",
+   "Pause": "일시 정지",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "라이브러리에서 효과나 필터를 선택하세요",
+   "Pitch": "피치",
+   "Pixelate": "픽셀화",
+@@ -413,6 +425,7 @@
+   "Sharpen": "선명하게",
+   "Shifts the picture towards candlelight.": "화면을 촛불 빛 쪽으로 옮깁니다.",
+   "Shifts the picture towards daylight shade.": "화면을 한낮의 그늘 쪽으로 옮깁니다.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "폴더에서 보기",
+   "Show {0}": "{0} 표시",
+   "Silent": "무음",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "재생 헤드에서 나누기 (S, 모든 클립은 ⌘B)",
+   "Stone and height: reflections that take a while to arrive.": "돌과 높이: 도착하기까지 시간이 걸리는 반사.",
+   "Strength": "강도",
++  "Style": "Style",
+   "Stylize": "스타일화",
+   "Subtitle": "부제",
+   "Summary": "요약",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "텍스트 음성 변환…",
+   "The bulge of a very wide lens.": "초광각 렌즈의 볼록함.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "체인은 위에서 아래로 실행됩니다. 화살표로 순서를 바꾸세요. 눈 아이콘은 설정한 값을 잃지 않고 한 항목을 우회합니다.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "클립이 더 이상 타임라인에 없습니다",
+   "The early reflections of a room.": "방의 초기 반사.",
+   "The left half, reflected onto the right.": "왼쪽 절반을 오른쪽에 비춥니다.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "{0} 잠금 해제",
+   "Unmute {0}": "{0} 음소거 해제",
+   "Unpacking…": "압축 해제 중…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "제목 없는 프로젝트",
+   "Up or down by semitones, the length untouched.": "반음 단위로 올리거나 내리며 길이는 그대로입니다.",
+   "Vertical": "세로",
+@@ -503,12 +520,15 @@
+   "Warm": "따뜻하게",
+   "Where should the project folder go?": "프로젝트 폴더를 어디에 만들까요?",
+   "Width": "너비",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "어제",
++  "Zoom in": "확대",
+   "Zoom In": "줌 인",
+-  "Zoom in": "확대",
+   "Zoom out": "축소",
+   "Zoom Out": "줌 아웃",
+   "Zoom to fit": "화면에 맞추기",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "{0}일 전",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0}개 설치됨 · 디스크 {1} MB",
+diff --git a/engine/crates/concat/locales/pt-BR.json b/engine/crates/concat/locales/pt-BR.json
+--- a/engine/crates/concat/locales/pt-BR.json
++++ b/engine/crates/concat/locales/pt-BR.json
+@@ -37,8 +37,8 @@
+   "Apply": "Aplicar",
+   "Audio": "Áudio",
+   "audio effect": "efeito de áudio",
++  "Audio Effects": "Efeitos de áudio",
+   "Audio effects": "Efeitos de áudio",
+-  "Audio Effects": "Efeitos de áudio",
+   "Auto": "Auto",
+   "auto": "auto",
+   "Auto captions": "Legendas automáticas",
+@@ -52,8 +52,8 @@
+   "Bits": "Bits",
+   "Black & White": "Preto e branco",
+   "Blend": "Mesclagem",
++  "Blue screen": "Tela azul",
+   "Blue Screen": "Tela azul",
+-  "Blue screen": "Tela azul",
+   "Blur": "Desfoque",
+   "Body": "Corpo",
+   "Bold": "Negrito",
+@@ -82,11 +82,13 @@
+   "centred": "centralizado",
+   "Change pitch with speed": "Mudar o tom com a velocidade",
+   "Change what this panel shows, or drag it onto another": "Mude o que este painel mostra, ou arraste-o sobre outro",
++  "Chapter card": "Chapter card",
+   "Chinese": "Chinês",
+   "Chipmunk": "Esquilo",
+   "Choose a folder": "Escolha uma pasta",
+   "Choose where the project folder should go": "Escolha onde a pasta do projeto deve ficar",
+   "Choose…": "Escolher…",
++  "Classic": "Classic",
+   "Clean": "Limpeza",
+   "Clear strokes": "Apagar traços",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Tira a sala de uma gravação: ronco, chiado, sibilância e nível irregular.",
+@@ -96,7 +98,6 @@
+   "Color": "Cor",
+   "Colour": "Cor",
+   "Combo": "Combo",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Conteúdo",
+   "CONTENTS": "CONTEÚDO",
+   "Contents": "Conteúdo",
+@@ -106,6 +107,9 @@
+   "Copied": "Copiado",
+   "Copy": "Copiar",
+   "Copy system information": "Copiar informações do sistema",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "Não foi possível salvar: {0}",
+   "Could not show the file: {0}": "Não foi possível mostrar o arquivo: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Recorte",
+   "Dancing grain, the texture of film stock.": "Granulação em movimento, a textura da película.",
+   "Dark": "Escuro",
++  "Dark plate": "Dark plate",
+   "Darken": "Escurecer",
+   "Darkened corners that draw the eye to the middle.": "Cantos escurecidos que levam o olhar ao centro.",
+   "Decay": "Decaimento",
+@@ -149,6 +154,7 @@
+   "Duration": "Duração",
+   "Echo": "Eco",
+   "Edit": "Editar",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "efeito",
+   "Effect library": "Biblioteca de efeitos",
+   "Effects": "Efeitos",
+@@ -180,8 +186,8 @@
+   "File": "Arquivo",
+   "Fill": "Preenchimento",
+   "Film Grain": "Granulação de filme",
++  "filter": "filtro",
+   "Filter": "Filtro",
+-  "filter": "filtro",
+   "Filter library": "Biblioteca de filtros",
+   "Filters": "Filtros",
+   "Finalising file": "Finalizando o arquivo",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Desfoque gaussiano",
+   "General": "Geral",
+   "Generate captions": "Gerar legendas",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Gerar fala",
+   "Generating voice": "Gerando voz",
+   "Glow": "Brilho",
+@@ -224,6 +231,7 @@
+   "Images": "Imagens",
+   "Import media": "Importar mídia",
+   "Import media…": "Importar mídia…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "1 arquivo importado",
+   "Imported {0} files": "{0} arquivos importados",
+   "Importing…": "Importando…",
+@@ -271,6 +279,7 @@
+   "Master": "Master",
+   "Media": "Mídia",
+   "Medium": "Médio",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimalista",
+   "Mirror": "Espelho",
+   "Mixing audio": "Mixando o áudio",
+@@ -295,8 +304,9 @@
+   "Neon": "Neon",
+   "New project": "Novo projeto",
+   "Next frame": "Próximo quadro",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Ainda não há modelos. Marque mídias como espaços e salve este projeto como modelo.",
+   "No voice to read with": "Nenhuma voz para ler",
+   "Noise": "Ruído",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Nada para ler ainda",
+   "Nothing under the playhead": "Nada sob o cursor",
+   "Nothing was said in that clip": "Nada foi dito nesse clipe",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Desligado",
+   "off": "desligado",
+   "One repeat, fading.": "Uma repetição que se esvai.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Um título por frase falada, no ritmo das palavras, na primeira faixa com espaço.",
+   "Only panel": "Único painel",
+   "Opacity": "Opacidade",
+   "Operating system": "Sistema operacional",
++  "Original": "Original",
+   "Other": "Outros",
+   "Out": "Saída",
+   "Outline": "Contorno",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Pintar no monitor",
+   "Paste": "Colar",
+   "Pause": "Pausar",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Escolha um efeito ou filtro na biblioteca",
+   "Pitch": "Tom",
+   "Pixelate": "Pixelizar",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Nitidez",
+   "Shifts the picture towards candlelight.": "Puxa a imagem para a luz de velas.",
+   "Shifts the picture towards daylight shade.": "Puxa a imagem para a sombra da luz do dia.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Mostrar na pasta",
+   "Show {0}": "Mostrar {0}",
+   "Silent": "Silêncio",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Dividir no cursor (S, ou ⌘B para todos os clipes)",
+   "Stone and height: reflections that take a while to arrive.": "Pedra e altura: reflexões que demoram a chegar.",
+   "Strength": "Intensidade",
++  "Style": "Style",
+   "Stylize": "Estilizar",
+   "Subtitle": "Subtítulo",
+   "Summary": "Resumo",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Texto para fala…",
+   "The bulge of a very wide lens.": "A curvatura de uma lente muito grande-angular.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "A cadeia vai de cima para baixo — reordene com as setas. O olho ignora um elo sem perder os valores que você ajustou.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "O clipe não está mais na linha do tempo",
+   "The early reflections of a room.": "As primeiras reflexões de uma sala.",
+   "The left half, reflected onto the right.": "A metade esquerda, refletida na direita.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "Desbloquear {0}",
+   "Unmute {0}": "Ativar o som de {0}",
+   "Unpacking…": "Descompactando…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Projeto sem título",
+   "Up or down by semitones, the length untouched.": "Para cima ou para baixo em semitons, sem mexer na duração.",
+   "Vertical": "Vertical",
+@@ -503,12 +520,15 @@
+   "Warm": "Quente",
+   "Where should the project folder go?": "Onde a pasta do projeto deve ficar?",
+   "Width": "Largura",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "ontem",
++  "Zoom in": "Ampliar",
+   "Zoom In": "Aproximar",
+-  "Zoom in": "Ampliar",
+   "Zoom out": "Reduzir",
+   "Zoom Out": "Afastar",
+   "Zoom to fit": "Ajustar à janela",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "há {0} dias",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} instalados · {1} MB em disco",
+diff --git a/engine/crates/concat/locales/ru.json b/engine/crates/concat/locales/ru.json
+--- a/engine/crates/concat/locales/ru.json
++++ b/engine/crates/concat/locales/ru.json
+@@ -37,8 +37,8 @@
+   "Apply": "Применить",
+   "Audio": "Аудио",
+   "audio effect": "аудиоэффект",
++  "Audio Effects": "Аудиоэффекты",
+   "Audio effects": "Аудиоэффекты",
+-  "Audio Effects": "Аудиоэффекты",
+   "Auto": "Авто",
+   "auto": "авто",
+   "Auto captions": "Автосубтитры",
+@@ -52,8 +52,8 @@
+   "Bits": "Биты",
+   "Black & White": "Чёрно-белое",
+   "Blend": "Наложение",
++  "Blue screen": "Синий экран",
+   "Blue Screen": "Синий экран",
+-  "Blue screen": "Синий экран",
+   "Blur": "Размытие",
+   "Body": "Тело",
+   "Bold": "Жирный",
+@@ -82,11 +82,13 @@
+   "centred": "по центру",
+   "Change pitch with speed": "Менять высоту со скоростью",
+   "Change what this panel shows, or drag it onto another": "Измените, что показывает эта панель, или перетащите её на другую",
++  "Chapter card": "Chapter card",
+   "Chinese": "Китайский",
+   "Chipmunk": "Бурундук",
+   "Choose a folder": "Выберите папку",
+   "Choose where the project folder should go": "Выберите, где будет папка проекта",
+   "Choose…": "Выбрать…",
++  "Classic": "Classic",
+   "Clean": "Очистка",
+   "Clear strokes": "Стереть штрихи",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Убирает комнату из записи: гул, шипение, свистящие и неровный уровень.",
+@@ -96,7 +98,6 @@
+   "Color": "Цвет",
+   "Colour": "Цвет",
+   "Combo": "Комбо",
+-  "Concat {0}": "Concat {0}",
+   "Content": "Содержание",
+   "CONTENTS": "СОДЕРЖИМОЕ",
+   "Contents": "Содержимое",
+@@ -106,6 +107,9 @@
+   "Copied": "Скопировано",
+   "Copy": "Копировать",
+   "Copy system information": "Копировать сведения о системе",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "Не удалось сохранить: {0}",
+   "Could not show the file: {0}": "Не удалось показать файл: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Вырезание",
+   "Dancing grain, the texture of film stock.": "Живое зерно, фактура киноплёнки.",
+   "Dark": "Тёмная",
++  "Dark plate": "Dark plate",
+   "Darken": "Затемнение",
+   "Darkened corners that draw the eye to the middle.": "Затемнённые углы, ведущие взгляд к центру.",
+   "Decay": "Затухание",
+@@ -149,6 +154,7 @@
+   "Duration": "Длительность",
+   "Echo": "Эхо",
+   "Edit": "Правка",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "эффект",
+   "Effect library": "Библиотека эффектов",
+   "Effects": "Эффекты",
+@@ -180,8 +186,8 @@
+   "File": "Файл",
+   "Fill": "Заливка",
+   "Film Grain": "Зерно плёнки",
++  "filter": "фильтр",
+   "Filter": "Фильтр",
+-  "filter": "фильтр",
+   "Filter library": "Библиотека фильтров",
+   "Filters": "Фильтры",
+   "Finalising file": "Завершение файла",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Размытие по Гауссу",
+   "General": "Общие",
+   "Generate captions": "Создать субтитры",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "Создать речь",
+   "Generating voice": "Создание голоса",
+   "Glow": "Свечение",
+@@ -224,6 +231,7 @@
+   "Images": "Изображения",
+   "Import media": "Импорт медиа",
+   "Import media…": "Импорт медиа…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "Импортирован 1 файл",
+   "Imported {0} files": "Импортировано файлов: {0}",
+   "Importing…": "Импорт…",
+@@ -271,6 +279,7 @@
+   "Master": "Мастер",
+   "Media": "Медиа",
+   "Medium": "Средний",
++  "Minecraft": "Minecraft",
+   "Minimal": "Минимальный",
+   "Mirror": "Зеркало",
+   "Mixing audio": "Сведение звука",
+@@ -295,8 +304,9 @@
+   "Neon": "Неон",
+   "New project": "Новый проект",
+   "Next frame": "Следующий кадр",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Шаблонов пока нет. Отметьте медиа как слоты и сохраните этот проект как шаблон.",
+   "No voice to read with": "Нет голоса для чтения",
+   "Noise": "Шум",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Пока нечего читать",
+   "Nothing under the playhead": "Под курсором ничего нет",
+   "Nothing was said in that clip": "В этом клипе ничего не сказано",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Выкл.",
+   "off": "выкл.",
+   "One repeat, fading.": "Один повтор, затухающий.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Один титр на каждую произнесённую фразу, в такт словам, на первой свободной дорожке.",
+   "Only panel": "Единственная панель",
+   "Opacity": "Непрозрачность",
+   "Operating system": "Операционная система",
++  "Original": "Original",
+   "Other": "Прочее",
+   "Out": "Конец",
+   "Outline": "Обводка",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Рисовать на мониторе",
+   "Paste": "Вставить",
+   "Pause": "Пауза",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "Выберите эффект или фильтр в библиотеке",
+   "Pitch": "Высота",
+   "Pixelate": "Пикселизация",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Резкость",
+   "Shifts the picture towards candlelight.": "Сдвигает картинку к свету свечей.",
+   "Shifts the picture towards daylight shade.": "Сдвигает картинку к дневной тени.",
++  "Short phrases": "Short phrases",
+   "Show in folder": "Показать в папке",
+   "Show {0}": "Показать {0}",
+   "Silent": "Тишина",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Разрезать по курсору (S, или ⌘B для всех клипов)",
+   "Stone and height: reflections that take a while to arrive.": "Камень и высота: отражения, которые долго идут.",
+   "Strength": "Сила",
++  "Style": "Style",
+   "Stylize": "Стилизация",
+   "Subtitle": "Подзаголовок",
+   "Summary": "Сводка",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Озвучивание текста…",
+   "The bulge of a very wide lens.": "Выпуклость очень широкого объектива.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "Цепочка идёт сверху вниз — меняйте порядок стрелками. Глаз обходит звено, не теряя выставленных значений.",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "Клипа больше нет на таймлайне",
+   "The early reflections of a room.": "Ранние отражения комнаты.",
+   "The left half, reflected onto the right.": "Левая половина, отражённая на правую.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "Разблокировать {0}",
+   "Unmute {0}": "Включить звук {0}",
+   "Unpacking…": "Распаковка…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "Проект без названия",
+   "Up or down by semitones, the length untouched.": "Вверх или вниз по полутонам, длина не меняется.",
+   "Vertical": "По вертикали",
+@@ -503,12 +520,15 @@
+   "Warm": "Тёплый",
+   "Where should the project folder go?": "Где разместить папку проекта?",
+   "Width": "Ширина",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "вчера",
++  "Zoom in": "Увеличить",
+   "Zoom In": "Приближение",
+-  "Zoom in": "Увеличить",
+   "Zoom out": "Уменьшить",
+   "Zoom Out": "Отдаление",
+   "Zoom to fit": "Вместить",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "{0} дн. назад",
+   "{0} Hz": "{0} Гц",
+   "{0} installed · {1} MB on disk": "Установлено: {0} · {1} МБ на диске",
+diff --git a/engine/crates/concat/locales/tr.json b/engine/crates/concat/locales/tr.json
+--- a/engine/crates/concat/locales/tr.json
++++ b/engine/crates/concat/locales/tr.json
+@@ -37,8 +37,8 @@
+   "Apply": "Uygula",
+   "Audio": "Ses",
+   "audio effect": "ses efekti",
++  "Audio Effects": "Ses efektleri",
+   "Audio effects": "Ses efektleri",
+-  "Audio Effects": "Ses efektleri",
+   "Auto": "Otomatik",
+   "auto": "otomatik",
+   "Auto captions": "Otomatik altyazı",
+@@ -52,8 +52,8 @@
+   "Bits": "Bit",
+   "Black & White": "Siyah-Beyaz",
+   "Blend": "Karışım",
++  "Blue screen": "Mavi perde",
+   "Blue Screen": "Mavi perde",
+-  "Blue screen": "Mavi perde",
+   "Blur": "Bulanıklık",
+   "Body": "Gövde",
+   "Bold": "Kalın",
+@@ -82,11 +82,13 @@
+   "centred": "ortada",
+   "Change pitch with speed": "Perdeyi hızla değiştir",
+   "Change what this panel shows, or drag it onto another": "Bu panelin gösterdiğini değiştirin veya başka bir panelin üzerine sürükleyin",
++  "Chapter card": "Bölüm başlığı",
+   "Chinese": "Çince",
+   "Chipmunk": "Sincap",
+   "Choose a folder": "Bir klasör seçin",
+   "Choose where the project folder should go": "Proje klasörünün nereye gideceğini seçin",
+   "Choose…": "Seç…",
++  "Classic": "Klasik",
+   "Clean": "Temizlik",
+   "Clear strokes": "Fırça izlerini sil",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "Kayıttaki odayı temizler: uğultu, hışırtı, ıslıklı sesler ve düzensiz seviye.",
+@@ -96,7 +98,6 @@
+   "Color": "Renk",
+   "Colour": "Renk",
+   "Combo": "Kombo",
+-  "Concat {0}": "Concat {0}",
+   "Content": "İçerik",
+   "CONTENTS": "İÇERİK",
+   "Contents": "İçerik",
+@@ -106,6 +107,9 @@
+   "Copied": "Kopyalandı",
+   "Copy": "Kopyala",
+   "Copy system information": "Sistem bilgilerini kopyala",
++  "Could not create the export folder: {0}": "Dışa aktarma klasörü oluşturulamadı: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Altyazı oluşturulamadı: {0}. SRT dosyası da içe aktarabilirsiniz.",
++  "Could not import SRT: {0}": "SRT içe aktarılamadı: {0}",
+   "Could not prepare automatic captions: {0}": "Otomatik altyazılar hazırlanamadı: {0}",
+   "Could not save: {0}": "Kaydedilemedi: {0}",
+   "Could not show the file: {0}": "Dosya gösterilemedi: {0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "Kesme",
+   "Dancing grain, the texture of film stock.": "Kıpırdayan gren, film dokusu.",
+   "Dark": "Koyu",
++  "Dark plate": "Koyu zemin",
+   "Darken": "Koyulaştır",
+   "Darkened corners that draw the eye to the middle.": "Gözü ortaya çeken koyulaşmış köşeler.",
+   "Decay": "Sönüm",
+@@ -149,6 +154,7 @@
+   "Duration": "Süre",
+   "Echo": "Yankı",
+   "Edit": "Düzen",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Altyazılar oyunun üzerinde görünür ve düzenlenebilir. Kelime zamanlaması yoksa kısa satırların süreleri yaklaşık hesaplanır.",
+   "effect": "efekt",
+   "Effect library": "Efekt kitaplığı",
+   "Effects": "Efektler",
+@@ -180,8 +186,8 @@
+   "File": "Dosya",
+   "Fill": "Dolgu",
+   "Film Grain": "Film greni",
++  "filter": "filtre",
+   "Filter": "Filtre",
+-  "filter": "filtre",
+   "Filter library": "Filtre kitaplığı",
+   "Filters": "Filtreler",
+   "Finalising file": "Dosya tamamlanıyor",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "Gauss bulanıklığı",
+   "General": "Genel",
+   "Generate captions": "Altyazı oluştur",
++  "Generate captions before reversing or adding a speed curve.": "Altyazıyı ters oynatma veya hız eğrisi eklemeden önce oluşturun.",
+   "Generate speech": "Konuşma oluştur",
+   "Generating voice": "Ses oluşturuluyor",
+   "Glow": "Parıltı",
+@@ -224,6 +231,7 @@
+   "Images": "Görüntüler",
+   "Import media": "Medya içe aktar",
+   "Import media…": "Medya içe aktar…",
++  "Import SRT captions": "SRT altyazı içe aktar",
+   "Imported 1 file": "1 dosya içe aktarıldı",
+   "Imported {0} files": "{0} dosya içe aktarıldı",
+   "Importing…": "İçe aktarılıyor…",
+@@ -271,6 +279,7 @@
+   "Master": "Master",
+   "Media": "Medya",
+   "Medium": "Orta",
++  "Minecraft": "Minecraft",
+   "Minimal": "Minimal",
+   "Mirror": "Ayna",
+   "Mixing audio": "Ses karıştırılıyor",
+@@ -295,8 +304,9 @@
+   "Neon": "Neon",
+   "New project": "Yeni proje",
+   "Next frame": "Sonraki kare",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "Altyazı modeli yüklü değil. Aşağıdaki düğmeye basın; Concat ücretsiz çok dilli modeli indirip otomatik olarak devam edecek.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "Altyazı modeli yüklü değil. Aşağıdaki düğmeye basın; Oblivion ücretsiz çok dilli modeli indirip otomatik olarak devam edecek.",
+   "No multilingual caption model is available in this build": "Bu sürümde çok dilli altyazı modeli bulunmuyor",
++  "No subtitles overlap this clip. SRT times must match the original media.": "Bu kliple örtüşen altyazı yok. SRT zamanları özgün video ile eşleşmelidir.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "Henüz şablon yok. Medyayı yuva olarak işaretleyin, sonra bu projeyi şablon olarak kaydedin.",
+   "No voice to read with": "Okuyacak ses yok",
+   "Noise": "Gürültü",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "Henüz okunacak bir şey yok",
+   "Nothing under the playhead": "Oynatma imlecinin altında bir şey yok",
+   "Nothing was said in that clip": "O klipte hiçbir şey söylenmedi",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "Kapalı",
+   "off": "kapalı",
+   "One repeat, fading.": "Sönen tek bir tekrar.",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "Söylenen her cümle için bir yazı, kelimelerin kendi zamanlamasıyla, yeri olan ilk şeritte.",
+   "Only panel": "Tek panel",
+   "Opacity": "Opaklık",
+   "Operating system": "İşletim sistemi",
++  "Original": "Özgün",
+   "Other": "Diğer",
+   "Out": "Çıkış",
+   "Outline": "Dış çizgi",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "Monitörde boya",
+   "Paste": "Yapıştır",
+   "Pause": "Duraklat",
++  "Phrase length": "Satır uzunluğu",
+   "Pick an effect or filter from the library": "Kitaplıktan bir efekt veya filtre seçin",
+   "Pitch": "Perde",
+   "Pixelate": "Pikselleştir",
+@@ -413,6 +425,7 @@
+   "Sharpen": "Netleştir",
+   "Shifts the picture towards candlelight.": "Görüntüyü mum ışığına doğru kaydırır.",
+   "Shifts the picture towards daylight shade.": "Görüntüyü gün ışığı gölgesine doğru kaydırır.",
++  "Short phrases": "Kısa satırlar",
+   "Show in folder": "Klasörde göster",
+   "Show {0}": "{0} göster",
+   "Silent": "Sessiz",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "Oynatma imlecinde böl (S, veya her klip için ⌘B)",
+   "Stone and height: reflections that take a while to arrive.": "Taş ve yükseklik: gelmesi zaman alan yansımalar.",
+   "Strength": "Güç",
++  "Style": "Stil",
+   "Stylize": "Stilize",
+   "Subtitle": "Alt başlık",
+   "Summary": "Özet",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "Metinden konuşma…",
+   "The bulge of a very wide lens.": "Çok geniş bir lensin şişkinliği.",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "Zincir yukarıdan aşağıya çalışır; oklarla yeniden sıralayın. Göz simgesi, ayarladığınız değerleri kaybetmeden bir halkayı atlar.",
++  "The clip changed. Generate captions again.": "Klip değişti. Altyazıyı yeniden oluşturun.",
+   "The clip is no longer on the timeline": "Klip artık zaman çizelgesinde değil",
+   "The early reflections of a room.": "Bir odanın erken yansımaları.",
+   "The left half, reflected onto the right.": "Sol yarı, sağa yansıtılmış.",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "{0} kilidini aç",
+   "Unmute {0}": "{0} sesini aç",
+   "Unpacking…": "Açılıyor…",
++  "unsaved changes": "kaydedilmemiş değişiklikler",
++  "Untitled": "Untitled",
+   "Untitled project": "Adsız proje",
+   "Up or down by semitones, the length untouched.": "Yarım tonlarla yukarı veya aşağı, uzunluk aynı.",
+   "Vertical": "Dikey",
+@@ -503,12 +520,15 @@
+   "Warm": "Sıcak",
+   "Where should the project folder go?": "Proje klasörü nereye gitsin?",
+   "Width": "Genişlik",
++  "Yellow highlight": "Sarı vurgu",
+   "yesterday": "dün",
++  "Zoom in": "Yaklaştır",
+   "Zoom In": "Yaklaşma",
+-  "Zoom in": "Yaklaştır",
+   "Zoom out": "Uzaklaştır",
+   "Zoom Out": "Uzaklaşma",
+   "Zoom to fit": "Sığdır",
++  "{0} clips": "{0} klip",
++  "{0} clips · {1} titles": "{0} klip · {1} metin",
+   "{0} days ago": "{0} gün önce",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "{0} kurulu · diskte {1} MB",
+diff --git a/engine/crates/concat/locales/zh-Hans.json b/engine/crates/concat/locales/zh-Hans.json
+--- a/engine/crates/concat/locales/zh-Hans.json
++++ b/engine/crates/concat/locales/zh-Hans.json
+@@ -37,8 +37,8 @@
+   "Apply": "应用",
+   "Audio": "音频",
+   "audio effect": "音频效果",
++  "Audio Effects": "音频效果",
+   "Audio effects": "音频效果",
+-  "Audio Effects": "音频效果",
+   "Auto": "自动",
+   "auto": "自动",
+   "Auto captions": "自动字幕",
+@@ -52,8 +52,8 @@
+   "Bits": "位数",
+   "Black & White": "黑白",
+   "Blend": "混合",
++  "Blue screen": "蓝幕",
+   "Blue Screen": "蓝幕",
+-  "Blue screen": "蓝幕",
+   "Blur": "模糊",
+   "Body": "厚度",
+   "Bold": "粗体",
+@@ -82,11 +82,13 @@
+   "centred": "居中",
+   "Change pitch with speed": "音高随速度变化",
+   "Change what this panel shows, or drag it onto another": "更改此面板显示的内容，或将它拖到另一个面板上",
++  "Chapter card": "Chapter card",
+   "Chinese": "中文",
+   "Chipmunk": "花栗鼠",
+   "Choose a folder": "选择文件夹",
+   "Choose where the project folder should go": "请选择项目文件夹的存放位置",
+   "Choose…": "选择…",
++  "Classic": "Classic",
+   "Clean": "净化",
+   "Clear strokes": "清除笔画",
+   "Clears the room out of a recording: rumble, hiss, sibilance and uneven level.": "去除录音中的房间感：低频轰鸣、底噪、齿音和不均匀的电平。",
+@@ -96,7 +98,6 @@
+   "Color": "颜色",
+   "Colour": "颜色",
+   "Combo": "组合",
+-  "Concat {0}": "Concat {0}",
+   "Content": "内容",
+   "CONTENTS": "内容",
+   "Contents": "内容",
+@@ -106,6 +107,9 @@
+   "Copied": "已复制",
+   "Copy": "复制",
+   "Copy system information": "复制系统信息",
++  "Could not create the export folder: {0}": "Could not create the export folder: {0}",
++  "Could not generate captions: {0}. You can also import an SRT file.": "Could not generate captions: {0}. You can also import an SRT file.",
++  "Could not import SRT: {0}": "Could not import SRT: {0}",
+   "Could not prepare automatic captions: {0}": "Could not prepare automatic captions: {0}",
+   "Could not save: {0}": "无法保存：{0}",
+   "Could not show the file: {0}": "无法显示文件：{0}",
+@@ -118,6 +122,7 @@
+   "Cutout": "抠像",
+   "Dancing grain, the texture of film stock.": "跳动的颗粒，胶片的质感。",
+   "Dark": "深色",
++  "Dark plate": "Dark plate",
+   "Darken": "变暗",
+   "Darkened corners that draw the eye to the middle.": "压暗的四角，将视线引向中央。",
+   "Decay": "衰减",
+@@ -149,6 +154,7 @@
+   "Duration": "时长",
+   "Echo": "回声",
+   "Edit": "编辑",
++  "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.": "Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.",
+   "effect": "效果",
+   "Effect library": "效果库",
+   "Effects": "效果",
+@@ -180,8 +186,8 @@
+   "File": "文件",
+   "Fill": "填充",
+   "Film Grain": "胶片颗粒",
++  "filter": "滤镜",
+   "Filter": "滤镜",
+-  "filter": "滤镜",
+   "Filter library": "滤镜库",
+   "Filters": "滤镜",
+   "Finalising file": "正在完成文件",
+@@ -203,6 +209,7 @@
+   "Gaussian Blur": "高斯模糊",
+   "General": "通用",
+   "Generate captions": "生成字幕",
++  "Generate captions before reversing or adding a speed curve.": "Generate captions before reversing or adding a speed curve.",
+   "Generate speech": "生成语音",
+   "Generating voice": "正在生成语音",
+   "Glow": "发光",
+@@ -224,6 +231,7 @@
+   "Images": "图片",
+   "Import media": "导入媒体",
+   "Import media…": "导入媒体…",
++  "Import SRT captions": "Import SRT captions",
+   "Imported 1 file": "已导入 1 个文件",
+   "Imported {0} files": "已导入 {0} 个文件",
+   "Importing…": "正在导入…",
+@@ -271,6 +279,7 @@
+   "Master": "母版",
+   "Media": "媒体",
+   "Medium": "中",
++  "Minecraft": "Minecraft",
+   "Minimal": "极简",
+   "Mirror": "镜像",
+   "Mixing audio": "正在混音",
+@@ -295,8 +304,9 @@
+   "Neon": "霓虹",
+   "New project": "新建项目",
+   "Next frame": "下一帧",
+-  "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.",
++  "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.": "No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.",
+   "No multilingual caption model is available in this build": "No multilingual caption model is available in this build",
++  "No subtitles overlap this clip. SRT times must match the original media.": "No subtitles overlap this clip. SRT times must match the original media.",
+   "No templates yet. Mark media as slots, then save this project as a template.": "还没有模板。将媒体标记为占位，再把此项目存为模板。",
+   "No voice to read with": "没有可用于朗读的声音",
+   "Noise": "噪点",
+@@ -312,13 +322,14 @@
+   "Nothing to read yet": "还没有可朗读的内容",
+   "Nothing under the playhead": "播放头下方没有内容",
+   "Nothing was said in that clip": "该片段中没有说话内容",
++  "Oblivion {0}": "Oblivion {0}",
+   "Off": "关",
+   "off": "关",
+   "One repeat, fading.": "一次重复，逐渐消失。",
+-  "One title per phrase spoken, cut to the words' own timing, on the first lane with room.": "每说一句生成一条字幕，按语句自身的时间切分，放在第一条有空位的轨道上。",
+   "Only panel": "唯一面板",
+   "Opacity": "不透明度",
+   "Operating system": "操作系统",
++  "Original": "Original",
+   "Other": "其他",
+   "Out": "出场",
+   "Outline": "描边",
+@@ -327,6 +338,7 @@
+   "Paint on the monitor": "在监视器上涂画",
+   "Paste": "粘贴",
+   "Pause": "暂停",
++  "Phrase length": "Phrase length",
+   "Pick an effect or filter from the library": "请从素材库中选择效果或滤镜",
+   "Pitch": "音高",
+   "Pixelate": "像素化",
+@@ -413,6 +425,7 @@
+   "Sharpen": "锐化",
+   "Shifts the picture towards candlelight.": "让画面偏向烛光的色调。",
+   "Shifts the picture towards daylight shade.": "让画面偏向日光阴影的色调。",
++  "Short phrases": "Short phrases",
+   "Show in folder": "在文件夹中显示",
+   "Show {0}": "显示 {0}",
+   "Silent": "静音",
+@@ -440,6 +453,7 @@
+   "Split at playhead (S, or ⌘B for every clip)": "在播放头处分割（S，全部片段用 ⌘B）",
+   "Stone and height: reflections that take a while to arrive.": "石壁与高度：需要一段时间才到达的反射。",
+   "Strength": "强度",
++  "Style": "Style",
+   "Stylize": "风格化",
+   "Subtitle": "副标题",
+   "Summary": "摘要",
+@@ -455,6 +469,7 @@
+   "Text to speech…": "文字转语音…",
+   "The bulge of a very wide lens.": "超广角镜头的膨胀感。",
+   "The chain runs top to bottom — reorder it with the chevrons. The eye bypasses one link without losing the values you dialled into it.": "效果链从上到下依次执行——用箭头调整顺序。眼睛图标可旁通某一环，而不丢失你已调好的数值。",
++  "The clip changed. Generate captions again.": "The clip changed. Generate captions again.",
+   "The clip is no longer on the timeline": "该片段已不在时间线上",
+   "The early reflections of a room.": "房间的早期反射。",
+   "The left half, reflected onto the right.": "左半边镜像到右半边。",
+@@ -488,6 +503,8 @@
+   "Unlock {0}": "解锁 {0}",
+   "Unmute {0}": "取消 {0} 静音",
+   "Unpacking…": "正在解包…",
++  "unsaved changes": "unsaved changes",
++  "Untitled": "Untitled",
+   "Untitled project": "未命名项目",
+   "Up or down by semitones, the length untouched.": "按半音升高或降低，时长不变。",
+   "Vertical": "垂直",
+@@ -503,12 +520,15 @@
+   "Warm": "暖色",
+   "Where should the project folder go?": "项目文件夹放在哪里？",
+   "Width": "宽度",
++  "Yellow highlight": "Yellow highlight",
+   "yesterday": "昨天",
++  "Zoom in": "放大",
+   "Zoom In": "推近",
+-  "Zoom in": "放大",
+   "Zoom out": "缩小",
+   "Zoom Out": "拉远",
+   "Zoom to fit": "适应窗口",
++  "{0} clips": "{0} clips",
++  "{0} clips · {1} titles": "{0} clips · {1} titles",
+   "{0} days ago": "{0} 天前",
+   "{0} Hz": "{0} Hz",
+   "{0} installed · {1} MB on disk": "已安装 {0} 个 · 占用 {1} MB",
+diff --git a/engine/crates/concat/src/lib.rs b/engine/crates/concat/src/lib.rs
+--- a/engine/crates/concat/src/lib.rs
++++ b/engine/crates/concat/src/lib.rs
+@@ -894,6 +894,21 @@
+     }));
+     app.on_captions_size_changed(on_window!(|state, index: i32| {
+         state.captions.size = (index.max(0) as usize).min(2);
++    }));
++    app.on_captions_style_changed(on_window!(|state, index: i32| {
++        state.captions.style = index.clamp(0, 3) as usize;
++    }));
++    app.on_captions_length_changed(on_window!(|state, index: i32| {
++        state.captions.length = index.clamp(0, 1) as usize;
++    }));
++    app.on_captions_import_srt(on_window!(|state| {
++        if let Some(paths) =
++            platform::pick_files(&i18n::t("Import SRT captions"), Some(("SRT", &["srt"])))
++        {
++            if let Some(path) = paths.first() {
++                state.captions_import_srt(path);
++            }
++        }
+     }));
+     app.on_captions_begin(on_window!(|state| {
+         state.captions_run();
+diff --git a/engine/crates/concat/src/presets.rs b/engine/crates/concat/src/presets.rs
+--- a/engine/crates/concat/src/presets.rs
++++ b/engine/crates/concat/src/presets.rs
+@@ -138,6 +138,37 @@
+     vec![
+         look("default", "Title", inter("New title", 600.0, 0.09), None),
+         look(
++            "oblivion.minecraft",
++            "Minecraft",
++            TextStyle {
++                color: "#ffffff".to_owned(),
++                stroke_width: 0.005,
++                stroke_color: "#111111".to_owned(),
++                ..inter("ELMAS BULDUM!", 800.0, 0.065)
++            },
++            Some(0.28),
++        ),
++        look(
++            "oblivion.highlight",
++            "Yellow highlight",
++            TextStyle {
++                color: "#ffe14a".to_owned(),
++                stroke_width: 0.004,
++                ..inter("İŞTE BU!", 800.0, 0.065)
++            },
++            Some(0.28),
++        ),
++        look(
++            "oblivion.chapter",
++            "Chapter card",
++            TextStyle {
++                background: "#101020dd".to_owned(),
++                color: "#c6f432".to_owned(),
++                ..inter("1. GÜN — HAYATTA KAL", 700.0, 0.075)
++            },
++            Some(0.0),
++        ),
++        look(
+             "concat.headline",
+             "Headline",
+             TextStyle {
+diff --git a/engine/crates/concat/src/studio.rs b/engine/crates/concat/src/studio.rs
+--- a/engine/crates/concat/src/studio.rs
++++ b/engine/crates/concat/src/studio.rs
+@@ -20,6 +20,7 @@
+ 
+ use std::cell::RefCell;
+ use std::collections::{HashMap, HashSet};
++use std::path::{Path, PathBuf};
+ use std::rc::Rc;
+ use std::sync::Arc;
+ 
+@@ -159,6 +160,12 @@
+     pub placement: usize,
+     /// 0 small, 1 medium, 2 large.
+     pub size: usize,
++    /// 0 classic, 1 Minecraft, 2 yellow, 3 dark plate.
++    pub style: usize,
++    /// 0 original phrases, 1 short phrases.
++    pub length: usize,
++    /// Invalidates callbacks after cancellation or switching projects.
++    pub generation: u64,
+     pub running: bool,
+     /// True while the one-click caption path is fetching its first Whisper model.
+     pub preparing: bool,
+@@ -192,7 +199,7 @@
+ const PACES: [f32; 3] = [0.85, 1.0, 1.15];
+ /// Where a caption sits, by the sheet's row: a frame-height fraction from
+ /// the centre, positive down. Bottom, centre, top.
+-const CAPTION_OFFSETS: [f64; 3] = [0.35, 0.0, -0.35];
++const CAPTION_OFFSETS: [f64; 3] = [0.28, 0.0, -0.30];
+ /// A caption's cap height by the sheet's row, as a fraction of the frame.
+ const CAPTION_SIZES: [f64; 3] = [0.04, 0.05, 0.065];
+ /// A rough speaking rate, for the estimate under the script.
+@@ -232,12 +239,85 @@
+     }
+ }
+ 
+-/// `name` under the home directory, as a path string; empty when there is
+-/// no home to speak of, and the form then asks for a folder outright.
++/// `name` under the user's home directory, as a path string.
++///
++/// Windows normally does not define HOME for GUI applications, so using it
++/// alone leaves the export folder empty and turns `name.mp4` into `/name.mp4`
++/// (the root of the current drive), which standard users cannot write. Prefer
++/// USERPROFILE there and keep HOME as the portable fallback.
+ fn home_folder(name: &str) -> String {
+-    std::env::var("HOME")
+-        .map(|home| format!("{home}/{name}"))
++    let home = std::env::var_os("USERPROFILE")
++        .filter(|value| !value.is_empty())
++        .map(PathBuf::from)
++        .or_else(|| {
++            std::env::var_os("HOME")
++                .filter(|value| !value.is_empty())
++                .map(PathBuf::from)
++        })
++        .or_else(|| {
++            let drive = std::env::var_os("HOMEDRIVE")?;
++            let path = std::env::var_os("HOMEPATH")?;
++            Some(PathBuf::from(drive).join(path))
++        })
++        .or_else(|| {
++            // Concat itself requires APPDATA on Windows, so this is the most
++            // reliable last-resort way to recover C:\Users\<name> in GUI
++            // launches where USERPROFILE/HOME are unexpectedly absent.
++            if !cfg!(windows) {
++                return None;
++            }
++            let roaming = std::env::var_os("APPDATA").map(PathBuf::from)?;
++            roaming.parent()?.parent().map(Path::to_path_buf)
++        });
++
++    let folder = if cfg!(target_os = "windows") && name == "Movies" {
++        // Explorer calls this known folder "Videos" even on translated
++        // Windows installations; the display name is localised separately.
++        "Videos"
++    } else {
++        name
++    };
++    home.map(|home| home.join(folder).to_string_lossy().into_owned())
+         .unwrap_or_default()
++}
++
++/// A file-system safe export stem. The same conservative set works on every
++/// desktop and avoids Windows' reserved path punctuation in project names.
++fn export_stem(raw: &str) -> String {
++    let raw = raw.trim();
++    let raw = raw
++        .strip_suffix(".mp4")
++        .or_else(|| raw.strip_suffix(".MP4"))
++        .unwrap_or(raw);
++    let mut out: String = raw
++        .chars()
++        .map(|ch| {
++            if ch.is_control() || matches!(ch, '<' | '>' | ':' | '"' | '/' | '\\' | '|' | '?' | '*')
++            {
++                '_'
++            } else {
++                ch
++            }
++        })
++        .collect();
++    out = out.trim().trim_matches('.').trim().to_owned();
++    if out.is_empty() { t("Untitled") } else { out }
++}
++
++/// CapCut-style "do not destroy the previous render" naming. If the chosen
++/// name is already there, use `name (2).mp4`, `name (3).mp4`, and so on.
++fn available_export_path(folder: &Path, stem: &str) -> PathBuf {
++    let first = folder.join(format!("{stem}.mp4"));
++    if !first.exists() {
++        return first;
++    }
++    for number in 2..10_000 {
++        let candidate = folder.join(format!("{stem} ({number}).mp4"));
++        if !candidate.exists() {
++            return candidate;
++        }
++    }
++    first
+ }
+ 
+ /// The settings sheet's state.
+@@ -290,9 +370,9 @@
+             // A phone has no desk: its projects live at the top of the
+             // folder the file manager shows for the app.
+             location: home_folder(if cfg!(target_os = "android") {
+-                "Concat"
++                "Oblivion"
+             } else {
+-                "Desktop/Concat"
++                "Desktop/Oblivion"
+             }),
+             resolution: 0,
+             rate: 3,
+@@ -1550,8 +1630,7 @@
+         let after = (before * factor).clamp(0.000_5, 1.5);
+         self.seconds_per_pixel = after;
+         if anchor >= 0.0 && before > 0.0 {
+-            self.scroll_left =
+-                (anchor - (anchor - self.scroll_left) * (after / before)).max(0.0);
++            self.scroll_left = (anchor - (anchor - self.scroll_left) * (after / before)).max(0.0);
+         }
+     }
+ 
+@@ -2620,6 +2699,10 @@
+             ClipTextField::FontFamily => text.font_family = value.to_owned(),
+             _ => {}
+         }
++        // The inspector's text field now emits on every keystroke. Echo lanes
++        // alone update the timeline data, not the rendered monitor, so ask for
++        // a fresh frame as well. The commit on blur still keeps this one undo.
++        self.request_preview();
+     }
+ 
+     pub fn clip_set_colour(&mut self, field: ClipTextField, value: slint::Color) {
+@@ -3788,6 +3871,7 @@
+ 
+     /// Opens a project as the session and leaves the launch screen.
+     pub fn open_project(&mut self, info: ProjectInfo) {
++        self.captions_cancel();
+         match Session::open_info(&info) {
+             Ok(session) => {
+                 if let Err(error) = projects::remember(&self.host.dirs.config, &info) {
+@@ -3857,6 +3941,7 @@
+ 
+     /// Saves, then closes the session and returns to the launch screen.
+     pub fn close_project(&mut self) {
++        self.captions_cancel();
+         self.pause();
+         self.host.cutouts.cancel();
+         self.cutout_jobs.clear();
+@@ -3946,6 +4031,35 @@
+             self.export.message = t("There is nothing on the timeline to export");
+             return;
+         }
++
++        // Resolve and create the destination before claiming the exporter.
++        // In particular this repairs the empty-folder case on Windows where
++        // HOME is absent and the old code tried to write to `/file.mp4`.
++        let mut folder = self.export.folder.trim().to_owned();
++        if folder.is_empty() {
++            folder = home_folder("Movies");
++        }
++        if folder.is_empty() {
++            // A project folder is already known to be writable (autosave uses
++            // it), so never fall through to the drive root. Keeping exports in
++            // a child folder is also a useful portable-build fallback.
++            folder = PathBuf::from(session.path())
++                .join("Exports")
++                .to_string_lossy()
++                .into_owned();
++        }
++        let folder_path = PathBuf::from(&folder);
++        if let Err(error) = std::fs::create_dir_all(&folder_path) {
++            self.export.phase = ExportPhase::Failed;
++            self.export.message = tf("Could not create the export folder: {0}", &[&error]);
++            return;
++        }
++        let stem = export_stem(&self.export.name);
++        let output_path = available_export_path(&folder_path, &stem);
++        let output = output_path.to_string_lossy().into_owned();
++        self.export.folder = folder_path.to_string_lossy().into_owned();
++        self.export.name = stem;
++
+         let job = match self.host.exporter.begin() {
+             Ok(job) => job,
+             Err(error) => {
+@@ -3954,11 +4068,6 @@
+                 return;
+             }
+         };
+-        let output = format!(
+-            "{}/{}.mp4",
+-            self.export.folder.trim_end_matches('/'),
+-            self.export.name.trim()
+-        );
+         let spec = ExportSpec {
+             output: output.clone(),
+             crf: EXPORT_CRF[self.export.quality.min(2)],
+@@ -4144,7 +4253,7 @@
+         let kokoro = Arc::clone(&self.host.speech);
+         spawn(
+             move || {
+-                let report = |progress: concat_speech::DownloadProgress| {
++                let report = move |progress: concat_speech::DownloadProgress| {
+                     on_ui(move |studio, _, _| {
+                         for list in [&mut studio.transcribers, &mut studio.voices] {
+                             if let Some(model) =
+@@ -4160,14 +4269,11 @@
+                         // If Auto Captions initiated this download, reuse the
+                         // same progress bar instead of sending the person to
+                         // Settings to watch a separate model row.
+-                        if studio.captions.waiting_model.as_deref()
+-                            == Some(progress.id.as_str())
+-                        {
++                        if studio.captions.waiting_model.as_deref() == Some(progress.id.as_str()) {
+                             studio.captions.running = true;
+                             studio.captions.preparing = true;
+                             studio.captions.progress = if progress.total > 0 {
+-                                (progress.received as f32 / progress.total as f32)
+-                                    .clamp(0.0, 1.0)
++                                (progress.received as f32 / progress.total as f32).clamp(0.0, 1.0)
+                             } else {
+                                 0.0
+                             };
+@@ -4181,9 +4287,8 @@
+                 };
+                 (id, result)
+             },
+-            |studio, _, _, (id, result)| {
+-                let resume_captions =
+-                    studio.captions.waiting_model.as_deref() == Some(id.as_str());
++            move |studio, _, _, (id, result)| {
++                let resume_captions = studio.captions.waiting_model.as_deref() == Some(id.as_str());
+                 for list in [&mut studio.transcribers, &mut studio.voices] {
+                     if let Some(model) = list.iter_mut().find(|model| model.id == id) {
+                         model.fetched = None;
+@@ -4224,10 +4329,8 @@
+                             studio.captions.preparing = false;
+                             studio.captions.running = false;
+                             studio.captions.progress = 0.0;
+-                            studio.captions.message = tf(
+-                                "Could not prepare automatic captions: {0}",
+-                                &[&error],
+-                            );
++                            studio.captions.message =
++                                tf("Could not prepare automatic captions: {0}", &[&error]);
+                         } else {
+                             studio.notify(&error, true);
+                         }
+@@ -4271,7 +4374,13 @@
+         };
+         let installed = Self::installed(&self.transcribers);
+         let model = installed.iter().position(|model| model.active).unwrap_or(0);
++        if self.captions.running || self.host.transcriber.is_busy() {
++            return;
++        }
+         self.captions = CaptionsSheet {
++            generation: self.captions.generation.wrapping_add(1),
++            style: 1,
++            length: 1,
+             open: true,
+             clip: Some(id),
+             language: self.settings.transcribe_language,
+@@ -4286,6 +4395,9 @@
+     /// worker, reports into the sheet as it goes, and lands as one batch of
+     /// title clips - one undo step - when it is done.
+     pub fn captions_run(&mut self) {
++        if self.captions.running {
++            return;
++        }
+         let Some(clip) = self
+             .captions
+             .clip
+@@ -4300,6 +4412,11 @@
+             self.captions.message = t("This clip has no file to transcribe");
+             return;
+         };
++        if clip.reverse || clip.speed_curve.is_some() {
++            self.captions.message =
++                t("Generate captions before reversing or adding a speed curve.");
++            return;
++        }
+         let language = TRANSCRIBE_LANGUAGES
+             .get(self.captions.language.max(0) as usize)
+             .copied()
+@@ -4333,27 +4450,31 @@
+             // tutorial. Fetch the multilingual Base Whisper model and carry
+             // straight on into transcription when it arrives. It is free and
+             // runs locally after the one-time download.
+-            const DEFAULT_CAPTION_MODEL: &str = "base";
++            let default_caption_model = "base";
+             if !self
+                 .transcribers
+                 .iter()
+-                .any(|model| model.id == DEFAULT_CAPTION_MODEL)
++                .any(|model| model.id == default_caption_model)
+             {
+                 self.captions.message =
+                     t("No multilingual caption model is available in this build");
+                 return;
+             }
+-            self.captions.waiting_model = Some(DEFAULT_CAPTION_MODEL.to_owned());
++            self.captions.waiting_model = Some(default_caption_model.to_owned());
+             self.captions.running = true;
+             self.captions.preparing = true;
+             self.captions.progress = 0.0;
+             self.captions.message.clear();
+-            self.model_download(DEFAULT_CAPTION_MODEL);
++            self.model_download(default_caption_model);
+             return;
+         };
+         self.captions.model = model_index;
+-        let offset_y = CAPTION_OFFSETS[self.captions.placement.min(2)];
+-        let font_size = CAPTION_SIZES[self.captions.size.min(2)];
++        let generation = self.captions.generation;
++        let project_path = self
++            .session
++            .as_ref()
++            .map(|session| session.path().to_owned());
++        let timeline_id = self.project().active_timeline_id.clone();
+         let request = concat_speech::transcribe::TranscribeRequest {
+             path: media.path.clone(),
+             source_start: clip.source_start,
+@@ -4370,59 +4491,172 @@
+         self.captions.message.clear();
+         spawn(
+             move || {
+-                transcriber.transcribe(&dirs, &request, |percent| {
++                transcriber.transcribe(&dirs, &request, move |percent| {
+                     on_ui(move |studio, _, _| {
++                        if studio.captions.generation != generation {
++                            return;
++                        }
+                         studio.captions.progress = (percent as f32 / 100.0).clamp(0.0, 1.0);
+                     });
+                 })
+             },
+             move |studio, _, _, result| {
++                if studio.captions.generation != generation {
++                    return;
++                }
+                 studio.captions.running = false;
++                if studio
++                    .session
++                    .as_ref()
++                    .map(|session| session.path().to_owned())
++                    != project_path
++                    || studio.project().active_timeline_id != timeline_id
++                    || studio.clip(&clip.id) != Some(&clip)
++                {
++                    studio.captions.message = t("The clip changed. Generate captions again.");
++                    return;
++                }
+                 match result {
+                     Ok(segments) => {
+-                        let commands: Vec<Command> = segments
+-                            .iter()
+-                            .filter(|segment| !segment.text.trim().is_empty())
+-                            .map(|segment| Command::AddTextClip {
+-                                track_id: None,
+-                                start: clip.start + segment.start / clip.speed,
+-                                style: Some(TextStyle {
+-                                    content: segment.text.trim().to_owned(),
+-                                    font_family: "Inter".to_owned(),
+-                                    font_size,
+-                                    font_weight: 700.0,
+-                                    // A thin black outline keeps automatic
+-                                    // captions readable over bright gameplay
+-                                    // without needing a permanent plate.
+-                                    stroke_width: 0.0022,
+-                                    stroke_color: "#000000".to_owned(),
+-                                    shadow: true,
+-                                    ..TextStyle::default()
+-                                }),
+-                                duration: Some(
+-                                    ((segment.end - segment.start) / clip.speed).max(0.2),
+-                                ),
+-                                offset_y: Some(offset_y),
++                        let cues = segments
++                            .into_iter()
++                            .map(|segment| concat_speech::subtitles::Cue {
++                                start: segment.start,
++                                end: segment.end,
++                                text: segment.text,
+                             })
+                             .collect();
+-                        let count = commands.len();
+-                        studio.captions.open = false;
+-                        if count == 0 {
+-                            studio.notify(&t("Nothing was said in that clip"), true);
+-                        } else {
+-                            studio.apply(Command::Batch { commands });
+-                            studio.notify(&tf("Added {0} captions", &[&count]), false);
+-                        }
++                        studio.insert_captions(&clip, cues);
+                     }
+-                    // Asked for: the sheet is already on its way down.
+                     Err(error) if error.contains("cancel") => studio.captions.open = false,
+-                    Err(error) => studio.captions.message = error,
++                    Err(error) => {
++                        studio.captions.message = tf(
++                            "Could not generate captions: {0}. You can also import an SRT file.",
++                            &[&error],
++                        );
++                    }
+                 }
+             },
+         );
+     }
+ 
++    /// Add editable, bounded text clips in one undo step.
++    fn insert_captions(&mut self, clip: &Clip, cues: Vec<concat_speech::subtitles::Cue>) {
++        if !clip.speed.is_finite() || clip.speed <= 0.0 {
++            return;
++        }
++        let offset_y = CAPTION_OFFSETS[self.captions.placement.min(2)];
++        let font_size = CAPTION_SIZES[self.captions.size.min(2)];
++        let mut style = TextStyle {
++            font_family: "Inter".to_owned(),
++            font_size,
++            font_weight: 700.0,
++            stroke_width: 0.0022,
++            stroke_color: "#000000".to_owned(),
++            shadow: true,
++            ..TextStyle::default()
++        };
++        match self.captions.style {
++            1 => {
++                style.font_weight = 800.0;
++                style.stroke_width = 0.0045;
++            }
++            2 => {
++                style.color = "#ffe14a".to_owned();
++                style.stroke_width = 0.0035;
++            }
++            3 => {
++                style.background = "#101020d9".to_owned();
++                style.stroke_width = 0.0;
++            }
++            _ => {}
++        }
++        let cues = concat_speech::subtitles::in_window(cues, 0.0, clip.duration * clip.speed);
++        let cues: Vec<_> = if self.captions.length == 1 {
++            cues.into_iter()
++                .flat_map(|cue| concat_speech::subtitles::short_phrases(cue, 4))
++                .collect()
++        } else {
++            cues
++        };
++        let commands: Vec<_> = cues
++            .into_iter()
++            .filter_map(|cue| {
++                let duration = (cue.end - cue.start) / clip.speed;
++                if cue.text.trim().is_empty() || duration < 1.0 / 60.0 {
++                    return None;
++                }
++                Some(Command::AddTextClip {
++                    track_id: None,
++                    start: clip.start + cue.start / clip.speed,
++                    style: Some(TextStyle {
++                        content: cue.text.trim().to_owned(),
++                        ..style.clone()
++                    }),
++                    duration: Some(duration),
++                    offset_y: Some(offset_y),
++                })
++            })
++            .collect();
++        let count = commands.len();
++        if count == 0 {
++            self.captions.message = t("Nothing was said in that clip");
++            return;
++        }
++        self.apply(Command::Batch { commands });
++        self.captions.open = false;
++        self.notify(&tf("Added {0} captions", &[&count]), false);
++    }
++
++    /// Import subtitles timed against the original media, respecting trim and speed.
++    pub fn captions_import_srt(&mut self, path: &Path) {
++        if self.captions.running {
++            return;
++        }
++        let Some(clip) = self
++            .captions
++            .clip
++            .as_ref()
++            .and_then(|id| self.clip(id))
++            .cloned()
++        else {
++            return;
++        };
++        if clip.reverse || clip.speed_curve.is_some() {
++            self.captions.message =
++                t("Generate captions before reversing or adding a speed curve.");
++            return;
++        }
++        let result = (|| {
++            use std::io::Read;
++            let file = std::fs::File::open(path).map_err(|e| e.to_string())?;
++            let mut text = String::new();
++            file.take(8 * 1024 * 1024 + 1)
++                .read_to_string(&mut text)
++                .map_err(|e| e.to_string())?;
++            concat_speech::subtitles::parse_srt(&text)
++        })();
++        match result {
++            Ok(cues) => {
++                let cues = concat_speech::subtitles::in_window(
++                    cues,
++                    clip.source_start,
++                    clip.duration * clip.speed,
++                );
++                if cues.is_empty() {
++                    self.captions.message = t(
++                        "No subtitles overlap this clip. SRT times must match the original media.",
++                    );
++                } else {
++                    self.insert_captions(&clip, cues);
++                }
++            }
++            Err(error) => self.captions.message = tf("Could not import SRT: {0}", &[&error]),
++        }
++    }
++
+     pub fn captions_cancel(&mut self) {
++        self.captions.generation = self.captions.generation.wrapping_add(1);
+         if self.captions.preparing {
+             self.host.transcriber.cancel_download();
+         } else {
+@@ -5020,9 +5254,9 @@
+         app.set_project_name(self.project_name.as_str().into());
+         app.set_project_status(
+             if self.dirty {
+-                "unsaved changes"
++                t("unsaved changes")
+             } else {
+-                "saved"
++                t("saved")
+             }
+             .into(),
+         );
+@@ -5227,6 +5461,8 @@
+             model: self.captions.model as i32,
+             placement: self.captions.placement as i32,
+             size: self.captions.size as i32,
++            style: self.captions.style as i32,
++            length: self.captions.length as i32,
+             running: self.captions.running,
+             preparing: self.captions.preparing,
+             progress: self.captions.progress,
+@@ -5303,24 +5539,29 @@
+             .iter()
+             .filter(|clip| clip.kind == model::ClipKind::Text)
+             .count();
++        let display_folder = if self.export.folder.trim().is_empty() {
++            home_folder("Movies")
++        } else {
++            self.export.folder.trim().to_owned()
++        };
++        let display_name = export_stem(&self.export.name);
++        let display_path = PathBuf::from(display_folder)
++            .join(format!("{display_name}.mp4"))
++            .to_string_lossy()
++            .into_owned();
+         ExportData {
+             open: self.export.open,
+             name: self.export.name.as_str().into(),
+-            path: format!(
+-                "{}/{}.mp4",
+-                self.export.folder.trim_end_matches('/'),
+-                self.export.name
+-            )
+-            .into(),
++            path: display_path.into(),
+             format: format!("{width} × {height} · {rate:.2} fps").into(),
+             duration: {
+                 let whole = self.duration().max(0.0) as i32;
+                 format!("{}:{:02}", whole / 60, whole % 60).into()
+             },
+             contents: if titles > 0 {
+-                format!("{clips} clips · {titles} titles")
++                tf("{0} clips · {1} titles", &[&clips, &titles])
+             } else {
+-                format!("{clips} clips")
++                tf("{0} clips", &[&clips])
+             }
+             .into(),
+             resolution: self.export.resolution as i32,
+@@ -5763,6 +6004,10 @@
+                     }
+                 }
+             }
++            "zoom-reset" => {
++                let before = self.seconds_per_pixel.max(0.000_5);
++                self.zoom_timeline(0.05 / before, self.playhead);
++            }
+             "tool-select" => self.tool = TimelineTool::Select,
+             // B toggles: pressing it with the razor up puts the pointer back.
+             "tool-razor" => {
+diff --git a/engine/crates/concat/src/sysinfo.rs b/engine/crates/concat/src/sysinfo.rs
+--- a/engine/crates/concat/src/sysinfo.rs
++++ b/engine/crates/concat/src/sysinfo.rs
+@@ -74,7 +74,7 @@
+     vec![
+         (
+             t("Application"),
+-            format!("Concat {}", env!("CARGO_PKG_VERSION")),
++            format!("Oblivion {}", env!("CARGO_PKG_VERSION")),
+         ),
+         (
+             t("Build"),
+diff --git a/engine/crates/concat/ui/app.slint b/engine/crates/concat/ui/app.slint
+--- a/engine/crates/concat/ui/app.slint
++++ b/engine/crates/concat/ui/app.slint
+@@ -59,7 +59,7 @@
+ }
+ 
+ export component App inherits Window {
+-    title: "Concat";
++    title: "Oblivion";
+     background: Theme.page;
+     default-font-family: Theme.font;
+     default-font-size: Theme.fs;
+@@ -177,6 +177,9 @@
+     callback captions-model-changed(index: int);
+     callback captions-placement-changed(index: int);
+     callback captions-size-changed(index: int);
++    callback captions-style-changed(index: int);
++    callback captions-length-changed(index: int);
++    callback captions-import-srt();
+     callback captions-begin();
+     callback captions-cancel();
+ 
+@@ -266,6 +269,11 @@
+             enabled: !root.on-start;
+             activated => { root.app-menu-selected("redo"); }
+         }
++        KeyBinding {
++            keys: @keys(Control + Digit0);
++            enabled: !root.on-start;
++            activated => { Editor.shortcut("zoom-reset"); }
++        }
+ 
+         // The rest of the keyboard, the way CapCut lays it out: the chord
+         // key with a letter for an edit, a bare letter for a tool, the
+@@ -289,6 +297,10 @@
+                 if (event.modifiers.shift) {
+                     if (event.text == "+" || event.text == "=") {
+                         Editor.shortcut("zoom-in");
++                        return accept;
++                    }
++                    if (event.text == "0" || event.text == ")") {
++                        Editor.shortcut("zoom-reset");
+                         return accept;
+                     }
+                     return reject;
+@@ -306,6 +318,9 @@
+                     return accept;
+                 }
+                 if (event.text == "-") { Editor.shortcut("zoom-out"); return accept; }
++                // Ctrl+0 returns the timeline to its comfortable default
++                // scale without moving the playhead away from the same x.
++                if (event.text == "0") { Editor.shortcut("zoom-reset"); return accept; }
+                 return reject;
+             }
+             if (event.modifiers.alt) {
+@@ -469,6 +484,9 @@
+         model-changed(index) => { root.captions-model-changed(index); }
+         placement-changed(index) => { root.captions-placement-changed(index); }
+         size-changed(index) => { root.captions-size-changed(index); }
++        style-changed(index) => { root.captions-style-changed(index); }
++        length-changed(index) => { root.captions-length-changed(index); }
++        import-srt => { root.captions-import-srt(); }
+         begin => { root.captions-begin(); }
+         cancel => { root.captions-cancel(); }
+     }
+diff --git a/engine/crates/concat/ui/dialogs/captions.slint b/engine/crates/concat/ui/dialogs/captions.slint
+--- a/engine/crates/concat/ui/dialogs/captions.slint
++++ b/engine/crates/concat/ui/dialogs/captions.slint
+@@ -28,6 +28,8 @@
+     placement: int,
+     /// 0 Small, 1 Medium, 2 Large
+     size: int,
++    style: int,
++    length: int,
+     running: bool,
+     /// True while the first free multilingual Whisper model is downloading.
+     preparing: bool,
+@@ -48,6 +50,9 @@
+     callback model-changed(index: int);
+     callback placement-changed(index: int);
+     callback size-changed(index: int);
++    callback style-changed(index: int);
++    callback length-changed(index: int);
++    callback import-srt();
+     callback begin();
+     callback cancel();
+ 
+@@ -84,7 +89,7 @@
+             }
+ 
+             if !root.data.ready: Text {
+-                text: I18n.t("No caption model is installed. Press the button below and Concat will download the free multilingual model, then continue automatically.");
++                text: I18n.t("No caption model is installed. Press the button below and Oblivion will download the free multilingual model, then continue automatically.");
+                 color: Theme.fg-muted;
+                 font-size: Theme.fs-sm;
+                 wrap: word-wrap;
+@@ -112,8 +117,24 @@
+                 }
+             }
+ 
++            DialogRow {
++                label: I18n.t("Style");
++                Select {
++                    options: [I18n.t("Classic"), "Minecraft", I18n.t("Yellow highlight"), I18n.t("Dark plate")];
++                    current: root.data.style;
++                    changed(index) => { root.style-changed(index); }
++                }
++            }
++            DialogRow {
++                label: I18n.t("Phrase length");
++                SegmentedControl {
++                    options: [I18n.t("Original"), I18n.t("Short phrases")];
++                    current: root.data.length;
++                    changed(index) => { root.length-changed(index); }
++                }
++            }
+             Text {
+-                text: I18n.t("One title per phrase spoken, cut to the words' own timing, on the first lane with room.");
++                text: I18n.t("Editable captions above gameplay. Short phrases use approximate timing when word timestamps are unavailable.");
+                 color: Theme.fg-dim;
+                 font-size: Theme.fs-sm;
+                 wrap: word-wrap;
+@@ -191,6 +212,11 @@
+                 }
+             }
+ 
++            if !root.data.running: Button {
++                label: I18n.t("Import SRT captions");
++                block: true;
++                clicked => { root.import-srt(); }
++            }
+             if !root.data.running: Button {
+                 block: true;
+                 primary: true;
+diff --git a/engine/crates/concat/ui/dialogs/settings.slint b/engine/crates/concat/ui/dialogs/settings.slint
+--- a/engine/crates/concat/ui/dialogs/settings.slint
++++ b/engine/crates/concat/ui/dialogs/settings.slint
+@@ -566,7 +566,7 @@
+                     title: I18n.t("About");
+ 
+                     Text {
+-                        text: I18n.t1("Concat {0}", "\{root.data.version}");
++                        text: I18n.t1("Oblivion {0}", "\{root.data.version}");
+                         color: Theme.fg;
+                         font-size: Theme.fs-lg;
+                         font-weight: Theme.weight-title;
+diff --git a/engine/crates/concat/ui/inspector/text-panel.slint b/engine/crates/concat/ui/inspector/text-panel.slint
+--- a/engine/crates/concat/ui/inspector/text-panel.slint
++++ b/engine/crates/concat/ui/inspector/text-panel.slint
+@@ -104,8 +104,11 @@
+                     selection-background-color: Theme.accent;
+                     selection-foreground-color: Theme.on-accent;
+ 
+-                    // Committed on the way out rather than per keystroke, so a
+-                    // title being typed is one change and not forty.
++                    // Preview every keystroke through the editor's echo so
++                    // the words appear on the monitor immediately. The undo
++                    // history still receives a single change when focus leaves
++                    // the field, because only then do we commit the echo.
++                    edited => { root.set-text(ClipTextField.content, self.text); }
+                     changed has-focus => {
+                         if (!self.has-focus) {
+                             root.set-text(ClipTextField.content, self.text);
+diff --git a/engine/crates/concat/ui/title-bar.slint b/engine/crates/concat/ui/title-bar.slint
+--- a/engine/crates/concat/ui/title-bar.slint
++++ b/engine/crates/concat/ui/title-bar.slint
+@@ -131,10 +131,12 @@
+         // mark + wordmark
+         VerticalLayout {
+             alignment: center;
+-            Image {
++            Rectangle {
+                 width: 16px;
+                 height: 16px;
+-                source: @image-url("assets/concat-logo.png");
++                border-radius: 8px;
++                border-width: 3px;
++                border-color: Theme.accent;
+             }
+         }
+ 
+@@ -143,7 +145,7 @@
+             padding-left: 6px;
+             padding-right: 6px;
+             Text {
+-                text: "Concat";
++                text: "Oblivion";
+                 color: Theme.fg;
+                 font-size: Theme.fs-lg;
+                 font-weight: Theme.weight-display;
+diff --git a/engine/crates/concat-host/src/titles.rs b/engine/crates/concat-host/src/titles.rs
+--- a/engine/crates/concat-host/src/titles.rs
++++ b/engine/crates/concat-host/src/titles.rs
+@@ -73,6 +73,7 @@
+     pub fn clips(&self, project: &Project, width: u32, height: u32) -> Vec<TitleClip> {
+         let timeline = project.active();
+         let mut out = Vec::new();
++        let mut title_order = 0usize;
+         for clip in &timeline.clips {
+             if clip.kind != ModelClipKind::Text {
+                 continue;
+@@ -101,7 +102,12 @@
+                     start: clip.start,
+                     duration: clip.duration,
+                     source_start: 0.0,
+-                    track: index,
++                    // Text is an overlay in an editor, not background
++                    // media. A new title currently lands on Track 1 while a
++                    // video may be on Track 4, which made the title's transform
++                    // handles visible but its pixels sit behind the video.
++                    // Composite every title above every media lane instead.
++                    track: timeline.tracks.len() + title_order,
+                     hidden: !track.visible,
+                     muted: true,
+                     volume: 0.0,
+@@ -139,6 +145,7 @@
+                 },
+                 block,
+             });
++            title_order += 1;
+         }
+         out
+     }
+diff --git a/engine/crates/concat-speech/examples/caption_smoke.rs b/engine/crates/concat-speech/examples/caption_smoke.rs
+new file mode 100644
+--- /dev/null
++++ b/engine/crates/concat-speech/examples/caption_smoke.rs
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// SPDX-FileCopyrightText: 2026 Oblivion contributors
++
++//! Exercise the shipping decoder and caption backend on an actual speech WAV.
++use concat_host::AppDirs;
++use concat_speech::Transcriber;
++use concat_speech::transcribe::TranscribeRequest;
++
++fn main() -> Result<(), String> {
++    eprintln!("Starting Oblivion speech smoke test");
++    let path = std::env::args()
++        .nth(1)
++        .ok_or("Pass the JFK speech WAV path")?;
++    let root = std::env::temp_dir().join("oblivion-caption-smoke");
++    let dirs = AppDirs::under(&root);
++    let transcriber = Transcriber::new();
++    eprintln!("Preparing multilingual Base model");
++    transcriber.download_model(&dirs, "base", |_| {})?;
++    eprintln!("Model ready; decoding reference audio");
++    let request = TranscribeRequest {
++        path,
++        source_start: 0.0,
++        window: 11.0,
++        language: "en".into(),
++        model_id: "base".into(),
++    };
++    let captions = transcriber.transcribe(&dirs, &request, |progress| {
++        eprintln!("Caption progress: {progress}%");
++    })?;
++    let text = captions
++        .iter()
++        .map(|cue| cue.text.as_str())
++        .collect::<Vec<_>>()
++        .join(" ");
++    println!("{text}");
++    if !text.to_lowercase().contains("country") {
++        return Err("The speech backend did not recognize the reference recording".into());
++    }
++    if !captions
++        .iter()
++        .all(|cue| cue.start >= 0.0 && cue.end > cue.start && cue.end <= 11.001)
++    {
++        return Err("Caption timestamps escaped the selected media window".into());
++    }
++    if transcriber.is_busy() {
++        return Err("Caption job remained busy after completion".into());
++    }
++    println!(
++        "Actual speech transcription passed ({} captions)",
++        captions.len()
++    );
++    Ok(())
++}
+diff --git a/engine/crates/concat-speech/src/lib.rs b/engine/crates/concat-speech/src/lib.rs
+--- a/engine/crates/concat-speech/src/lib.rs
++++ b/engine/crates/concat-speech/src/lib.rs
+@@ -17,6 +17,7 @@
+ //! (sherpa-onnx's static libraries) stays out of everything that does not
+ //! speak.
+ 
++pub mod subtitles;
+ pub mod transcribe;
+ pub mod tts;
+ 
+diff --git a/engine/crates/concat-speech/src/subtitles.rs b/engine/crates/concat-speech/src/subtitles.rs
+new file mode 100644
+--- /dev/null
++++ b/engine/crates/concat-speech/src/subtitles.rs
+@@ -0,0 +1,262 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// SPDX-FileCopyrightText: 2026 Oblivion contributors
++
++//! Portable subtitle parsing and timing. No model or native library required.
++
++/// A caption in seconds relative to its source.
++#[derive(Clone, Debug, PartialEq)]
++pub struct Cue {
++    /// Inclusive start.
++    pub start: f64,
++    /// Exclusive end.
++    pub end: f64,
++    /// Plain text; line breaks are preserved.
++    pub text: String,
++}
++
++fn timestamp(value: &str) -> Option<f64> {
++    let fields: Vec<_> = value.trim().split([':', ',', '.']).collect();
++    if fields.len() != 4
++        || fields[3].len() != 3
++        || fields
++            .iter()
++            .any(|field| field.is_empty() || !field.bytes().all(|b| b.is_ascii_digit()))
++    {
++        return None;
++    }
++    let hours = fields[0].parse::<u32>().ok()?;
++    let minutes = fields[1].parse::<u32>().ok()?;
++    let seconds = fields[2].parse::<u32>().ok()?;
++    let millis = fields[3].parse::<u32>().ok()?;
++    (minutes < 60 && seconds < 60).then_some(
++        hours as f64 * 3600.0 + minutes as f64 * 60.0 + seconds as f64 + millis as f64 / 1000.0,
++    )
++}
++
++/// Read UTF-8 SRT, accepting BOM, CRLF and optional numeric cue indices.
++/// Reject the entire file on malformed input instead of importing half of it.
++pub fn parse_srt(input: &str) -> Result<Vec<Cue>, String> {
++    if input.len() > 8 * 1024 * 1024 {
++        return Err("SRT is larger than 8 MB".into());
++    }
++    let normalized = input
++        .trim_start_matches('\u{feff}')
++        .replace("\r\n", "\n")
++        .replace('\r', "\n");
++    let mut blocks: Vec<Vec<&str>> = Vec::new();
++    let mut block = Vec::new();
++    for line in normalized.lines() {
++        if line.trim().is_empty() {
++            if !block.is_empty() {
++                blocks.push(std::mem::take(&mut block));
++            }
++        } else {
++            block.push(line);
++        }
++    }
++    if !block.is_empty() {
++        blocks.push(block);
++    }
++    let mut cues = Vec::new();
++    for (index, block) in blocks.iter().enumerate() {
++        let fail = || format!("Invalid SRT cue {}", index + 1);
++        let timing = usize::from(!block[0].contains("-->"));
++        if timing == 1 && !block[0].trim().bytes().all(|b| b.is_ascii_digit()) {
++            return Err(fail());
++        }
++        let line = block.get(timing).ok_or_else(fail)?;
++        let (left, right) = line.split_once("-->").ok_or_else(fail)?;
++        let start = timestamp(left).ok_or_else(fail)?;
++        let end = timestamp(right).ok_or_else(fail)?;
++        let text = block.get(timing + 1..).ok_or_else(fail)?.join("\n");
++        if end <= start || text.trim().is_empty() {
++            return Err(fail());
++        }
++        cues.push(Cue { start, end, text });
++    }
++    if cues.is_empty() {
++        return Err("The SRT file contains no captions".into());
++    }
++    cues.sort_by(|a, b| a.start.total_cmp(&b.start));
++    Ok(cues)
++}
++
++/// Split long captions without losing words or exceeding the original interval.
++/// Timing is proportional to word count when individual word timing is absent.
++pub fn short_phrases(cue: Cue, max_words: usize) -> Vec<Cue> {
++    let words: Vec<_> = cue.text.split_whitespace().collect();
++    if words.is_empty() || !cue.start.is_finite() || !cue.end.is_finite() || cue.end <= cue.start {
++        return Vec::new();
++    }
++    let max_words = max_words.max(1);
++    if words.len() <= max_words {
++        return vec![cue];
++    }
++    let mut result = Vec::new();
++    for (index, chunk) in words.chunks(max_words).enumerate() {
++        let offset = index * max_words;
++        let start = cue.start + (cue.end - cue.start) * offset as f64 / words.len() as f64;
++        let end =
++            cue.start + (cue.end - cue.start) * (offset + chunk.len()) as f64 / words.len() as f64;
++        result.push(Cue {
++            start,
++            end,
++            text: chunk.join(" "),
++        });
++    }
++    result
++}
++
++/// Reassemble subword tokens into short phrases with the recognizer's own timing.
++/// Invalid or unavailable timing returns no cues so callers can use prose timing.
++pub fn timed_tokens(tokens: &[String], starts: &[f32], durations: &[f32], window: f64) -> Vec<Cue> {
++    if tokens.len() != starts.len()
++        || tokens.len() != durations.len()
++        || !window.is_finite()
++        || window <= 0.0
++    {
++        return Vec::new();
++    }
++    let mut result = Vec::new();
++    let mut text = String::new();
++    let mut start = 0.0;
++    let mut end = 0.0;
++    for (index, token) in tokens.iter().enumerate() {
++        let at = starts[index] as f64;
++        let length = durations[index] as f64;
++        if !at.is_finite() || !length.is_finite() || at < 0.0 || length < 0.0 {
++            return Vec::new();
++        }
++        if index > 0 && starts[index] < starts[index - 1] {
++            return Vec::new();
++        }
++        // Flush before the next word; do not cut a Turkish word between BPE tokens.
++        let new_word = token.chars().next().is_some_and(char::is_whitespace);
++        if new_word
++            && !text.trim().is_empty()
++            && (text.split_whitespace().count() >= 4 || at - end > 0.65)
++        {
++            if end > start {
++                result.push(Cue {
++                    start,
++                    end,
++                    text: text.trim().to_owned(),
++                });
++            }
++            text.clear();
++        }
++        if text.is_empty() {
++            start = at.min(window);
++        }
++        text.push_str(token);
++        end = (at + length).min(window);
++    }
++    if end > start && !text.trim().is_empty() {
++        result.push(Cue {
++            start,
++            end,
++            text: text.trim().to_owned(),
++        });
++    }
++    result
++}
++
++/// Intersect source-time SRT cues with a trimmed media window.
++pub fn in_window(cues: Vec<Cue>, source_start: f64, window: f64) -> Vec<Cue> {
++    if !source_start.is_finite() || !window.is_finite() || source_start < 0.0 || window <= 0.0 {
++        return Vec::new();
++    }
++    cues.into_iter()
++        .filter_map(|cue| {
++            let start = (cue.start - source_start).max(0.0);
++            let end = (cue.end - source_start).min(window);
++            (end > start).then_some(Cue {
++                start,
++                end,
++                text: cue.text,
++            })
++        })
++        .collect()
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn turkish_bom_crlf_and_multiline_survive() {
++        let cues = parse_srt(
++            "\u{feff}1\r\n00:00:01,250 --> 00:00:02,500\r\nİşte elmas!\r\nÇok güzel.\r\n",
++        )
++        .unwrap();
++        assert_eq!(
++            cues,
++            vec![Cue {
++                start: 1.25,
++                end: 2.5,
++                text: "İşte elmas!\nÇok güzel.".into()
++            }]
++        );
++    }
++
++    #[test]
++    fn rejects_bad_timing_and_partial_imports() {
++        for text in [
++            "",
++            "1\n00:70:00,000 --> 00:70:01,000\nbad",
++            "1\n00:00:02,000 --> 00:00:01,000\nbad",
++            "1\n00:00:01,000 --> 00:00:02,000\ngood\n\n2\nbad",
++        ] {
++            assert!(parse_srt(text).is_err(), "{text}");
++        }
++    }
++
++    #[test]
++    fn trim_intersects_cues_and_rebases_to_clip() {
++        let cues = parse_srt("00:00:03,000 --> 00:00:06,000\nfirst\n\n00:00:08,000 --> 00:00:12,000\nlast\n\n00:00:14,000 --> 00:00:15,000\nout").unwrap();
++        let clipped = in_window(cues, 5.0, 5.0);
++        assert_eq!((clipped[0].start, clipped[0].end), (0.0, 1.0));
++        assert_eq!((clipped[1].start, clipped[1].end), (3.0, 5.0));
++        assert_eq!(clipped.len(), 2);
++    }
++
++    #[test]
++    fn short_phrases_preserve_words_and_final_boundary() {
++        let text = "Şimdi bu mağarada dört tane elmas buldum arkadaşlar";
++        let pieces = short_phrases(
++            Cue {
++                start: 2.0,
++                end: 3.0,
++                text: text.into(),
++            },
++            4,
++        );
++        assert_eq!(
++            pieces
++                .iter()
++                .map(|c| c.text.as_str())
++                .collect::<Vec<_>>()
++                .join(" "),
++            text
++        );
++        assert_eq!(pieces.first().unwrap().start, 2.0);
++        assert_eq!(pieces.last().unwrap().end, 3.0);
++        assert!(pieces.windows(2).all(|pair| pair[0].end == pair[1].start));
++    }
++
++    #[test]
++    fn token_timing_preserves_turkish_subwords_and_silence() {
++        let tokens =
++            [" Şim", "di", " elmas", " buldum", " arkadaşlar", " buraya"].map(String::from);
++        let cues = timed_tokens(&tokens, &[0.1, 0.2, 0.4, 0.6, 0.8, 3.0], &[0.1; 6], 4.0);
++        assert_eq!(cues[0].text, "Şimdi elmas buldum arkadaşlar");
++        assert_eq!(cues[1].text, "buraya");
++        assert!(cues[0].end < 1.0 && cues[1].start == 3.0);
++    }
++
++    #[test]
++    fn invalid_token_timing_uses_fallback() {
++        assert!(timed_tokens(&["hello".into()], &[f32::NAN], &[0.5], 1.0).is_empty());
++        assert!(timed_tokens(&["hello".into()], &[], &[], 1.0).is_empty());
++    }
++}
+diff --git a/engine/crates/concat-speech/src/transcribe.rs b/engine/crates/concat-speech/src/transcribe.rs
+--- a/engine/crates/concat-speech/src/transcribe.rs
++++ b/engine/crates/concat-speech/src/transcribe.rs
+@@ -20,18 +20,25 @@
+ //!    segments come back relative to the window.
+ 
+ use std::path::PathBuf;
++use std::sync::Arc;
++#[cfg(not(windows))]
++use std::sync::Mutex;
+ use std::sync::atomic::Ordering;
+-use std::sync::{Arc, Mutex};
+ 
+ use concat_host::{AppDirs, SingleFlight};
+ use concat_media::{AudioDecoder, AudioOptions, SampleFormat};
+ use serde::{Deserialize, Serialize};
++#[cfg(not(windows))]
+ use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
++
++#[cfg(windows)]
++use sherpa_onnx::{OfflineRecognizer, OfflineRecognizerConfig, OfflineWhisperModelConfig};
+ 
+ use crate::DownloadProgress;
+ 
+ /// One downloadable Whisper model. Sizes are approximate, for progress bars
+ /// when the server declines to send a Content-Length.
++#[cfg(not(windows))]
+ struct KnownModel {
+     id: &'static str,
+     label: &'static str,
+@@ -46,6 +53,7 @@
+ /// All from the official `ggerganov/whisper.cpp` conversions. Nothing bigger
+ /// than `small`: `medium` is 1.5 GB and minutes-per-minute on CPU, which is
+ /// the opposite of what this feature is for.
++#[cfg(not(windows))]
+ const KNOWN_MODELS: &[KnownModel] = &[
+     KnownModel {
+         id: "tiny.en",
+@@ -91,15 +99,18 @@
+     },
+ ];
+ 
++#[cfg(not(windows))]
+ fn known(id: &str) -> Option<&'static KnownModel> {
+     KNOWN_MODELS.iter().find(|model| model.id == id)
+ }
+ 
++#[cfg(not(windows))]
+ fn model_url(id: &str) -> String {
+     format!("https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-{id}.bin")
+ }
+ 
+ /// Where downloaded models live: `<app data>/whisper-models/ggml-<id>.bin`.
++#[cfg(not(windows))]
+ fn models_dir(dirs: &AppDirs) -> Result<PathBuf, String> {
+     let dir = dirs.data.join("whisper-models");
+     std::fs::create_dir_all(&dir)
+@@ -107,10 +118,21 @@
+     Ok(dir)
+ }
+ 
++#[cfg(not(windows))]
+ fn model_file(dirs: &AppDirs, id: &str) -> Result<PathBuf, String> {
+     // Ids come from our own table; anything else is a bug, not input.
+     known(id).ok_or_else(|| format!("unknown model {id:?}"))?;
+     Ok(models_dir(dirs)?.join(format!("ggml-{id}.bin")))
++}
++
++/// A model file has to be close to the published size, not merely exist. A
++/// truncated file from an interrupted older download can otherwise survive
++/// forever and fail later inside whisper's encoder with an opaque error.
++#[cfg(not(windows))]
++fn model_file_looks_complete(path: &std::path::Path, expected: u64) -> bool {
++    path.metadata()
++        .map(|meta| meta.is_file() && meta.len() >= expected.saturating_mul(85) / 100)
++        .unwrap_or(false)
+ }
+ 
+ /// One model, as the settings panel shows it.
+@@ -169,6 +191,291 @@
+     pub model_id: String,
+ }
+ 
++#[cfg(windows)]
++const SHERPA_WHISPER_ID: &str = "sherpa-onnx-whisper-base";
++#[cfg(windows)]
++const SHERPA_WHISPER_ARCHIVE_ESTIMATE: u64 = 300_000_000;
++
++#[cfg(windows)]
++fn sherpa_whisper_dir(dirs: &AppDirs) -> Result<PathBuf, String> {
++    let dir = dirs
++        .data
++        .join("sherpa-whisper-models")
++        .join(SHERPA_WHISPER_ID);
++    Ok(dir)
++}
++
++#[cfg(windows)]
++fn sherpa_whisper_files(dirs: &AppDirs) -> Result<(PathBuf, PathBuf, PathBuf), String> {
++    let dir = sherpa_whisper_dir(dirs)?;
++    Ok((
++        dir.join("base-encoder.int8.onnx"),
++        dir.join("base-decoder.int8.onnx"),
++        dir.join("base-tokens.txt"),
++    ))
++}
++
++#[cfg(windows)]
++fn sherpa_whisper_ready(dirs: &AppDirs) -> bool {
++    sherpa_whisper_files(dirs)
++        .map(|(encoder, decoder, tokens)| {
++            encoder
++                .metadata()
++                .map(|m| m.len() > 5_000_000)
++                .unwrap_or(false)
++                && decoder
++                    .metadata()
++                    .map(|m| m.len() > 20_000_000)
++                    .unwrap_or(false)
++                && tokens
++                    .metadata()
++                    .map(|m| m.len() > 100_000)
++                    .unwrap_or(false)
++        })
++        .unwrap_or(false)
++}
++
++/// Install only the three inference files, streaming the archive from HTTPS.
++/// This avoids storing the full archive, float32 copies and test recordings.
++#[cfg(windows)]
++fn ensure_sherpa_whisper_model(
++    dirs: &AppDirs,
++    cancel: &std::sync::atomic::AtomicBool,
++    mut report_percent: impl FnMut(i32),
++) -> Result<(), String> {
++    use std::io::Read;
++    use std::sync::atomic::AtomicBool;
++
++    struct ProgressReader<'a, R, F> {
++        inner: R,
++        cancel: &'a AtomicBool,
++        report: F,
++        received: u64,
++        last_report: u64,
++        total: u64,
++    }
++
++    impl<R: Read, F: FnMut(i32)> Read for ProgressReader<'_, R, F> {
++        fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
++            if self.cancel.load(Ordering::Relaxed) {
++                // Interrupted is retried by io::copy; cancellation must be terminal.
++                return Err(std::io::Error::other("transcription cancelled"));
++            }
++            let count = self.inner.read(buffer)?;
++            self.received += count as u64;
++            if self.received - self.last_report >= 2 * 1024 * 1024 || count == 0 {
++                self.last_report = self.received;
++                let percent = (self.received as f64 / self.total.max(1) as f64 * 20.0)
++                    .clamp(0.0, 20.0) as i32;
++                (self.report)(percent);
++            }
++            Ok(count)
++        }
++    }
++
++    if sherpa_whisper_ready(dirs) {
++        return Ok(());
++    }
++    let parent = dirs.data.join("sherpa-whisper-models");
++    std::fs::create_dir_all(&parent).map_err(|error| error.to_string())?;
++    let destination = parent.join(SHERPA_WHISPER_ID);
++    let staging = parent.join(format!(".staging-{SHERPA_WHISPER_ID}"));
++    let _ = std::fs::remove_dir_all(&staging);
++    std::fs::create_dir_all(&staging).map_err(|error| error.to_string())?;
++
++    let outcome = (|| {
++        let url = format!(
++            "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/{SHERPA_WHISPER_ID}.tar.bz2"
++        );
++        let response = ureq::AgentBuilder::new()
++            .timeout_connect(std::time::Duration::from_secs(20))
++            .timeout_read(std::time::Duration::from_secs(30))
++            .build()
++            .get(&url)
++            .call()
++            .map_err(|error| format!("caption model download failed: {error}"))?;
++        let total = response.header("Content-Length")
++            .and_then(|value| value.parse::<u64>().ok())
++            .unwrap_or(SHERPA_WHISPER_ARCHIVE_ESTIMATE);
++        let reader = ProgressReader {
++            inner: response.into_reader(), cancel, report: &mut report_percent,
++            received: 0, last_report: 0, total,
++        };
++        let decoder = bzip2::read::BzDecoder::new(std::io::BufReader::new(reader));
++        let mut archive = tar::Archive::new(decoder);
++        let required = [
++            ("base-encoder.int8.onnx", 5_000_000),
++            ("base-decoder.int8.onnx", 20_000_000),
++            ("base-tokens.txt", 100_000),
++        ];
++        for entry in archive.entries().map_err(|error| error.to_string())? {
++            let mut entry = entry.map_err(|error| error.to_string())?;
++            let path = entry.path().map_err(|error| error.to_string())?.into_owned();
++            let Some((name, _)) = required.iter().find(|(name, _)| {
++                path == std::path::Path::new(SHERPA_WHISPER_ID).join(name)
++            }) else { continue; };
++            if !entry.header().entry_type().is_file() {
++                return Err("caption model archive contains an invalid file".to_owned());
++            }
++            let mut output = std::fs::File::create(staging.join(name))
++                .map_err(|error| format!("could not write caption model: {error}"))?;
++            std::io::copy(&mut entry, &mut output)
++                .map_err(|error| format!("caption model download interrupted: {error}"))?;
++        }
++        // Consume the compressed trailer as well, so a damaged archive is rejected.
++        let mut decoder = archive.into_inner();
++        std::io::copy(&mut decoder, &mut std::io::sink())
++            .map_err(|error| format!("caption model archive was damaged: {error}"))?;
++        drop(decoder);
++        report_percent(21);
++        if cancel.load(Ordering::Relaxed) {
++            return Err("transcription cancelled".to_owned());
++        }
++        if !required.iter().all(|(name, minimum)| {
++            staging.join(name).metadata().is_ok_and(|meta| meta.is_file() && meta.len() > *minimum)
++        }) {
++            return Err("caption model archive was incomplete".to_owned());
++        }
++        if destination.exists() {
++            std::fs::remove_dir_all(&destination).map_err(|error| error.to_string())?;
++        }
++        // Rename on the same filesystem; no second copy or half-installed model.
++        std::fs::rename(&staging, &destination)
++            .map_err(|error| format!("could not finish caption model: {error}"))?;
++        report_percent(25);
++        Ok(())
++    })();
++    if outcome.is_err() {
++        let _ = std::fs::remove_dir_all(&staging);
++    }
++    outcome
++}
++
++
++/// Turn recognizer prose into short on-screen phrases rather than one giant
++/// title. This is intentionally closer to social-video captioning: about 2-5
++/// words per card, with punctuation ending a card early.
++#[cfg(windows)]
++fn caption_phrases(text: &str) -> Vec<String> {
++    let mut out = Vec::new();
++    let mut current = Vec::new();
++    for word in text.split_whitespace() {
++        current.push(word);
++        let punctuation = word.ends_with('.')
++            || word.ends_with('!')
++            || word.ends_with('?')
++            || word.ends_with(',')
++            || word.ends_with(';')
++            || word.ends_with(':');
++        if current.len() >= 5 || (current.len() >= 2 && punctuation) {
++            out.push(current.join(" "));
++            current.clear();
++        }
++    }
++    if !current.is_empty() {
++        out.push(current.join(" "));
++    }
++    out
++}
++
++#[cfg(windows)]
++fn transcribe_with_sherpa(
++    dirs: &AppDirs,
++    request: &TranscribeRequest,
++    samples: &[f32],
++    cancel: &std::sync::atomic::AtomicBool,
++    mut progress: impl FnMut(i32),
++) -> Result<Vec<Segment>, String> {
++    use std::sync::atomic::Ordering;
++
++    ensure_sherpa_whisper_model(dirs, cancel, |percent| progress(percent))?;
++    if cancel.load(Ordering::Relaxed) {
++        return Err("transcription cancelled".to_owned());
++    }
++    let (encoder, decoder, tokens) = sherpa_whisper_files(dirs)?;
++    let mut config = OfflineRecognizerConfig::default();
++    let language = match request.language.as_str() {
++        "" | "auto" => "",
++        other => other,
++    };
++    config.model_config.whisper = OfflineWhisperModelConfig {
++        encoder: Some(encoder.to_string_lossy().into_owned()),
++        decoder: Some(decoder.to_string_lossy().into_owned()),
++        language: Some(language.to_owned()),
++        task: Some("transcribe".to_owned()),
++        tail_paddings: -1,
++        enable_token_timestamps: true,
++        enable_segment_timestamps: false,
++    };
++    config.model_config.tokens = Some(tokens.to_string_lossy().into_owned());
++    config.model_config.provider = Some("cpu".to_owned());
++    config.model_config.num_threads = 2;
++    config.decoding_method = Some("greedy_search".to_owned());
++
++    let recognizer = OfflineRecognizer::create(&config)
++        .ok_or_else(|| "could not start the Windows caption recognizer".to_owned())?;
++
++    const RATE: usize = 16_000;
++    const CHUNK_SECONDS: usize = 8;
++    const CHUNK_SAMPLES: usize = RATE * CHUNK_SECONDS;
++    let total_chunks = samples.len().div_ceil(CHUNK_SAMPLES).max(1);
++    let mut segments = Vec::new();
++
++    for (index, chunk) in samples.chunks(CHUNK_SAMPLES).enumerate() {
++        if cancel.load(Ordering::Relaxed) {
++            return Err("transcription cancelled".to_owned());
++        }
++        let stream = recognizer.create_stream();
++        stream.accept_waveform(RATE as i32, chunk);
++        recognizer.decode(&stream);
++        if cancel.load(Ordering::Relaxed) {
++            return Err("transcription cancelled".to_owned());
++        }
++        let result = stream
++            .get_result()
++            .ok_or_else(|| "Windows caption recognizer returned no result".to_owned())?;
++        {
++            let chunk_start = (index * CHUNK_SAMPLES) as f64 / RATE as f64;
++            let chunk_duration = chunk.len() as f64 / RATE as f64;
++            let timed = result
++                .timestamps
++                .as_ref()
++                .zip(result.durations.as_ref())
++                .map(|(times, lengths)| {
++                    crate::subtitles::timed_tokens(&result.tokens, times, lengths, chunk_duration)
++                })
++                .unwrap_or_default();
++            if !timed.is_empty() {
++                segments.extend(timed.into_iter().map(|cue| Segment {
++                    start: chunk_start + cue.start,
++                    end: chunk_start + cue.end,
++                    text: cue.text,
++                }));
++            } else {
++                let phrases = caption_phrases(result.text.trim());
++                if !phrases.is_empty() {
++                    let chunk_start = (index * CHUNK_SAMPLES) as f64 / RATE as f64;
++                    let chunk_duration = chunk.len() as f64 / RATE as f64;
++                    let each = chunk_duration / phrases.len() as f64;
++                    for (phrase_index, text) in phrases.into_iter().enumerate() {
++                        let start = chunk_start + phrase_index as f64 * each;
++                        let end = (start + each).min(chunk_start + chunk_duration);
++                        if let Some(segment) = keep_segment(start, end, text) {
++                            segments.push(segment);
++                        }
++                    }
++                }
++            }
++        }
++        let done = index + 1;
++        let percent = 25 + ((done as f64 / total_chunks as f64) * 75.0).round() as i32;
++        progress(percent.clamp(25, 100));
++    }
++    progress(100);
++    Ok(segments)
++}
++
++#[cfg(not(windows))]
+ struct LoadedModel {
+     id: String,
+     context: WhisperContext,
+@@ -181,6 +488,7 @@
+     downloads: Arc<SingleFlight>,
+     /// Held for the whole transcription, which is what lets
+     /// [`Transcriber::delete_model`] refuse to delete a model mid-use.
++    #[cfg(not(windows))]
+     model: Mutex<Option<LoadedModel>>,
+ }
+ 
+@@ -196,27 +504,48 @@
+         Self {
+             gate: Arc::new(SingleFlight::new()),
+             downloads: Arc::new(SingleFlight::new()),
++            #[cfg(not(windows))]
+             model: Mutex::new(None),
+         }
+     }
+ 
+     /// Per-model state, for the settings panel.
+     pub fn status(dirs: &AppDirs) -> Result<TranscriberStatus, String> {
+-        let dir = models_dir(dirs)?;
+-        Ok(TranscriberStatus {
+-            models_dir: dir.to_string_lossy().into_owned(),
+-            models: KNOWN_MODELS
+-                .iter()
+-                .map(|model| ModelStatus {
+-                    id: model.id.to_owned(),
+-                    label: model.label.to_owned(),
+-                    blurb: model.blurb.to_owned(),
+-                    english_only: model.english_only,
+-                    size_bytes: model.approx_bytes,
+-                    downloaded: dir.join(format!("ggml-{}.bin", model.id)).is_file(),
+-                })
+-                .collect(),
+-        })
++        #[cfg(windows)]
++        {
++            return Ok(TranscriberStatus {
++                models_dir: sherpa_whisper_dir(dirs)?.to_string_lossy().into_owned(),
++                models: vec![ModelStatus {
++                    id: "base".to_owned(),
++                    label: "Base (Multilingual · Windows)".to_owned(),
++                    blurb: "Local Turkish captions using the Windows speech engine.".to_owned(),
++                    english_only: false,
++                    size_bytes: SHERPA_WHISPER_ARCHIVE_ESTIMATE,
++                    downloaded: sherpa_whisper_ready(dirs),
++                }],
++            });
++        }
++        #[cfg(not(windows))]
++        {
++            let dir = models_dir(dirs)?;
++            Ok(TranscriberStatus {
++                models_dir: dir.to_string_lossy().into_owned(),
++                models: KNOWN_MODELS
++                    .iter()
++                    .map(|model| ModelStatus {
++                        id: model.id.to_owned(),
++                        label: model.label.to_owned(),
++                        blurb: model.blurb.to_owned(),
++                        english_only: model.english_only,
++                        size_bytes: model.approx_bytes,
++                        downloaded: model_file_looks_complete(
++                            &dir.join(format!("ggml-{}.bin", model.id)),
++                            model.approx_bytes,
++                        ),
++                    })
++                    .collect(),
++            })
++        }
+     }
+ 
+     /// Streams one model from Hugging Face into the models folder. Blocks
+@@ -232,30 +561,61 @@
+         mut progress: impl FnMut(DownloadProgress),
+     ) -> Result<(), String> {
+         let job = self.downloads.begin("model download")?;
+-        let destination = model_file(dirs, id)?;
+-        if destination.is_file() {
++        #[cfg(windows)]
++        {
++            if id != "base" {
++                return Err(format!("unknown Windows caption model {id:?}"));
++            }
++            ensure_sherpa_whisper_model(dirs, job.cancel_flag(), |percent| {
++                progress(DownloadProgress {
++                    id: id.to_owned(),
++                    received: percent.clamp(0, 25) as u64 * SHERPA_WHISPER_ARCHIVE_ESTIMATE / 25,
++                    total: SHERPA_WHISPER_ARCHIVE_ESTIMATE,
++                    unpacking: percent >= 21,
++                    done: percent >= 25,
++                });
++            })?;
++            progress(DownloadProgress {
++                id: id.to_owned(),
++                received: SHERPA_WHISPER_ARCHIVE_ESTIMATE,
++                total: SHERPA_WHISPER_ARCHIVE_ESTIMATE,
++                unpacking: false,
++                done: true,
++            });
+             return Ok(());
+         }
+-        let estimate = known(id).map(|model| model.approx_bytes).unwrap_or(0);
+-        let partial = destination.with_extension("bin.part");
+-        let (received, total) = crate::download_to(
+-            &model_url(id),
+-            &partial,
+-            id,
+-            estimate,
+-            job.cancel_flag(),
+-            &mut progress,
+-        )?;
+-        std::fs::rename(&partial, &destination)
+-            .map_err(|error| format!("could not finish {}: {error}", destination.display()))?;
+-        progress(DownloadProgress {
+-            id: id.to_owned(),
+-            received,
+-            total,
+-            unpacking: false,
+-            done: true,
+-        });
+-        Ok(())
++        #[cfg(not(windows))]
++        {
++            let destination = model_file(dirs, id)?;
++            let estimate = known(id).map(|model| model.approx_bytes).unwrap_or(0);
++            if model_file_looks_complete(&destination, estimate) {
++                return Ok(());
++            }
++            // A short/corrupt file is not a downloaded model. Remove it so the
++            // atomic .part -> final download below can repair it automatically.
++            if destination.exists() {
++                let _ = std::fs::remove_file(&destination);
++            }
++            let partial = destination.with_extension("bin.part");
++            let (received, total) = crate::download_to(
++                &model_url(id),
++                &partial,
++                id,
++                estimate,
++                job.cancel_flag(),
++                &mut progress,
++            )?;
++            std::fs::rename(&partial, &destination)
++                .map_err(|error| format!("could not finish {}: {error}", destination.display()))?;
++            progress(DownloadProgress {
++                id: id.to_owned(),
++                received,
++                total,
++                unpacking: false,
++                done: true,
++            });
++            Ok(())
++        }
+     }
+ 
+     /// Asks the running download to stop. Idle is a harmless no-op.
+@@ -265,15 +625,32 @@
+ 
+     /// Removes a downloaded model file, unless a transcription is using it.
+     pub fn delete_model(&self, dirs: &AppDirs, id: &str) -> Result<(), String> {
+-        let file = model_file(dirs, id)?;
+-        let mut loaded = self.model.try_lock().map_err(|_| {
+-            "a transcription is running - wait for it or cancel it first".to_owned()
+-        })?;
+-        if loaded.as_ref().is_some_and(|model| model.id == id) {
+-            *loaded = None;
+-        }
+-        std::fs::remove_file(&file)
+-            .map_err(|error| format!("could not remove {}: {error}", file.display()))
++        #[cfg(windows)]
++        {
++            // Own both gates for the entire removal, including the filesystem operation.
++            let _job = self.gate.begin("model removal")?;
++            let _download = self.downloads.begin("model removal")?;
++            if id != "base" {
++                return Err(format!("unknown Windows caption model {id:?}"));
++            }
++            let dir = sherpa_whisper_dir(dirs)?;
++            if dir.exists() {
++                std::fs::remove_dir_all(&dir).map_err(|e| e.to_string())?;
++            }
++            return Ok(());
++        }
++        #[cfg(not(windows))]
++        {
++            let file = model_file(dirs, id)?;
++            let mut loaded = self.model.try_lock().map_err(|_| {
++                "a transcription is running - wait for it or cancel it first".to_owned()
++            })?;
++            if loaded.as_ref().is_some_and(|model| model.id == id) {
++                *loaded = None;
++            }
++            std::fs::remove_file(&file)
++                .map_err(|error| format!("could not remove {}: {error}", file.display()))
++        }
+     }
+ 
+     /// Transcribes one clip's audio window into caption segments. Blocks
+@@ -292,15 +669,12 @@
+         let job = self.gate.begin("transcription")?;
+         let cancel = job.cancel_handle();
+ 
+-        let model_path = model_file(dirs, &request.model_id)?;
+-        if !model_path.is_file() {
+-            return Err(format!(
+-                "model {} is not downloaded - see Settings > Transcriber",
+-                request.model_id
+-            ));
+-        }
+         // NaN is refused along with zero and negative windows.
+-        if request.window.is_nan() || request.window <= 0.0 {
++        if !request.window.is_finite()
++            || request.window <= 0.0
++            || !request.source_start.is_finite()
++            || request.source_start < 0.0
++        {
+             return Err("nothing to transcribe: the clip covers no time".to_owned());
+         }
+ 
+@@ -317,7 +691,17 @@
+             },
+         )
+         .map_err(|error| error.to_string())?;
+-        let samples = decoder.collect_f32().map_err(|error| error.to_string())?;
++        let mut samples = decoder.collect_f32().map_err(|error| error.to_string())?;
++        // Bad media occasionally decodes a NaN/Inf transient. One non-finite
++        // sample can poison the mel/encoder math, so make the stream finite
++        // before handing it to whisper.cpp.
++        for sample in &mut samples {
++            *sample = if sample.is_finite() {
++                sample.clamp(-1.0, 1.0)
++            } else {
++                0.0
++            };
++        }
+         if samples.is_empty() {
+             return Err("nothing to transcribe: the clip has no audio".to_owned());
+         }
+@@ -325,61 +709,158 @@
+             return Err("transcription cancelled".to_owned());
+         }
+ 
+-        let mut loaded = self
+-            .model
+-            .lock()
+-            .map_err(|_| "transcriber state poisoned".to_owned())?;
+-        if loaded.as_ref().map(|model| model.id.as_str()) != Some(request.model_id.as_str()) {
+-            // Load before overwriting: a failed load keeps the old model.
+-            let context =
+-                WhisperContext::new_with_params(&model_path, WhisperContextParameters::default())
++        // Do not use whisper.cpp on Windows. A subset of Windows machines
++        // consistently returns GenericError(-6) from its encoder even when
++        // the same model and audio are valid. Concat already ships the
++        // sherpa-onnx runtime for TTS, so the Windows caption path uses its
++        // independent Whisper ONNX implementation instead.
++        #[cfg(windows)]
++        {
++            let _download = self.downloads.begin("caption model preparation")?;
++            return transcribe_with_sherpa(dirs, request, &samples, cancel.as_ref(), progress);
++        }
++
++        #[cfg(not(windows))]
++        {
++            let model_path = model_file(dirs, &request.model_id)?;
++            if !model_path.is_file() {
++                return Err(format!(
++                    "model {} is not downloaded - see Settings > Transcriber",
++                    request.model_id
++                ));
++            }
++
++            let mut loaded = self
++                .model
++                .lock()
++                .map_err(|_| "transcriber state poisoned".to_owned())?;
++            if loaded.as_ref().map(|model| model.id.as_str()) != Some(request.model_id.as_str()) {
++                // Load before overwriting: a failed load keeps the old model.
++                let mut context_params = WhisperContextParameters::default();
++                // The Windows build is distributed to unknown GPUs/drivers. Keep
++                // captions on whisper's portable CPU backend there; the editor's
++                // preview GPU remains unaffected. This avoids backend-specific
++                // encoder failures on otherwise valid audio/model files.
++                if cfg!(windows) {
++                    context_params.use_gpu(false);
++                }
++                let context = WhisperContext::new_with_params(&model_path, context_params)
+                     .map_err(|error| format!("could not load the model: {error}"))?;
+-            *loaded = Some(LoadedModel {
+-                id: request.model_id.clone(),
+-                context,
+-            });
+-        }
+-        let context = &loaded.as_ref().expect("model loaded above").context;
+-        let mut state = context
+-            .create_state()
+-            .map_err(|error| format!("could not start whisper: {error}"))?;
+-
+-        let threads = std::thread::available_parallelism()
+-            .map(|count| count.get().min(8))
+-            .unwrap_or(4);
+-        let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
+-        params.set_n_threads(threads as i32);
+-        params.set_language(Some(if request.language.is_empty() {
+-            "auto"
+-        } else {
+-            &request.language
+-        }));
+-        params.set_print_special(false);
+-        params.set_print_progress(false);
+-        params.set_print_realtime(false);
+-        params.set_print_timestamps(false);
+-        params.set_suppress_blank(true);
+-        let abort = Arc::clone(&cancel);
+-        params.set_abort_callback_safe(move || abort.load(Ordering::Relaxed));
+-        params.set_progress_callback_safe(progress);
+-
+-        state
+-            .full(params, &samples)
+-            .map_err(|error| format!("transcription failed: {error}"))?;
+-        if cancel.load(Ordering::Relaxed) {
+-            return Err("transcription cancelled".to_owned());
+-        }
+-
+-        Ok(state
+-            .as_iter()
+-            .filter_map(|segment| {
+-                // Whisper's timestamps are centiseconds.
+-                let start = segment.start_timestamp() as f64 / 100.0;
+-                let end = segment.end_timestamp() as f64 / 100.0;
+-                let text = segment.to_str_lossy().ok()?.trim().to_owned();
+-                keep_segment(start, end, text)
+-            })
+-            .collect())
++                *loaded = Some(LoadedModel {
++                    id: request.model_id.clone(),
++                    context,
++                });
++            }
++            let context = &loaded.as_ref().expect("model loaded above").context;
++
++            // whisper.cpp normally walks long inputs in 30-second windows on its
++            // own. Some Windows CPU/backend combinations can nevertheless return
++            // its generic encoder failure (-6) part-way through a longer clip.
++            // Feeding independent sub-30-second windows is both more memory
++            // friendly and gives us a useful retry point. A failed window is tried
++            // once more with a single worker thread before we give up.
++            const WHISPER_RATE: usize = 16_000;
++            const CHUNK_SECONDS: usize = 15;
++            const CHUNK_SAMPLES: usize = WHISPER_RATE * CHUNK_SECONDS;
++            let threads = if cfg!(windows) {
++                // Reliability over peak speed for the broad Windows binary. The
++                // lighter Tiny fallback keeps this usable even on modest CPUs.
++                1
++            } else {
++                std::thread::available_parallelism()
++                    .map(|count| count.get().min(4))
++                    .unwrap_or(2)
++                    .max(1)
++            };
++            let progress = Arc::new(Mutex::new(progress));
++            let total_samples = samples.len().max(1);
++            let mut all_segments = Vec::new();
++
++            for (chunk_index, chunk) in samples.chunks(CHUNK_SAMPLES).enumerate() {
++                if cancel.load(Ordering::Relaxed) {
++                    return Err("transcription cancelled".to_owned());
++                }
++                let chunk_start = chunk_index * CHUNK_SAMPLES;
++                let time_offset = chunk_start as f64 / WHISPER_RATE as f64;
++                let mut completed = None;
++                let mut last_error = None;
++
++                for attempt_threads in [threads, 1] {
++                    // Do not run the same single-thread attempt twice.
++                    if attempt_threads == 1 && threads == 1 && last_error.is_some() {
++                        break;
++                    }
++                    let mut state = context
++                        .create_state()
++                        .map_err(|error| format!("could not start whisper: {error}"))?;
++                    let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
++                    params.set_n_threads(attempt_threads as i32);
++                    params.set_language(Some(if request.language.is_empty() {
++                        "auto"
++                    } else {
++                        &request.language
++                    }));
++                    params.set_print_special(false);
++                    params.set_print_progress(false);
++                    params.set_print_realtime(false);
++                    params.set_print_timestamps(false);
++                    params.set_suppress_blank(true);
++                    params.set_no_context(true);
++                    let abort = Arc::clone(&cancel);
++                    params.set_abort_callback_safe(move || abort.load(Ordering::Relaxed));
++
++                    let callback = Arc::clone(&progress);
++                    let base = chunk_start as f32 / total_samples as f32;
++                    let span = chunk.len() as f32 / total_samples as f32;
++                    params.set_progress_callback_safe(move |percent| {
++                        let overall = ((base + span * (percent as f32 / 100.0)) * 100.0)
++                            .round()
++                            .clamp(0.0, 100.0) as i32;
++                        if let Ok(mut callback) = callback.lock() {
++                            (*callback)(overall);
++                        }
++                    });
++
++                    match state.full(params, chunk) {
++                        Ok(()) => {
++                            let segments: Vec<Segment> = state
++                                .as_iter()
++                                .filter_map(|segment| {
++                                    // Whisper's timestamps are centiseconds and
++                                    // are relative to this chunk.
++                                    let start =
++                                        time_offset + segment.start_timestamp() as f64 / 100.0;
++                                    let end = time_offset + segment.end_timestamp() as f64 / 100.0;
++                                    let text = segment.to_str_lossy().ok()?.trim().to_owned();
++                                    keep_segment(start, end, text)
++                                })
++                                .collect();
++                            completed = Some(segments);
++                            break;
++                        }
++                        Err(error) => {
++                            last_error = Some(error.to_string());
++                        }
++                    }
++                }
++
++                let Some(segments) = completed else {
++                    return Err(format!(
++                        "transcription failed around {:.0}s: {}. Try the Tiny or Base multilingual model and close other heavy apps.",
++                        time_offset,
++                        last_error.unwrap_or_else(|| "Whisper encoder error".to_owned())
++                    ));
++                };
++                all_segments.extend(segments);
++            }
++            if cancel.load(Ordering::Relaxed) {
++                return Err("transcription cancelled".to_owned());
++            }
++            if let Ok(mut callback) = progress.lock() {
++                (*callback)(100);
++            }
++            Ok(all_segments)
++        }
+     }
+ 
+     /// Asks the running transcription to stop at its next check.
+@@ -397,10 +878,17 @@
+ /// ("[BLANK_AUDIO]", "(upbeat music)"). Those are not captions, and neither
+ /// is an empty or degenerate span.
+ fn keep_segment(start: f64, end: f64, text: String) -> Option<Segment> {
+-    if text.is_empty() || (text.starts_with('[') && text.ends_with(']')) {
++    if text.is_empty()
++        || (text.starts_with('[') && text.ends_with(']'))
++        || (text.starts_with('(') && text.ends_with(')'))
++    {
+         return None;
+     }
+-    (end > start).then_some(Segment { start, end, text })
++    (start.is_finite() && end.is_finite() && start >= 0.0 && end > start).then_some(Segment {
++        start,
++        end,
++        text,
++    })
+ }
+ 
+ #[cfg(test)]
+@@ -419,6 +907,7 @@
+     }
+ 
+     #[test]
++    #[cfg(not(windows))]
+     fn every_known_model_has_a_url_and_file_name() {
+         for model in KNOWN_MODELS {
+             assert!(model_url(model.id).ends_with(&format!("ggml-{}.bin", model.id)));
+@@ -427,6 +916,7 @@
+     }
+ 
+     #[test]
++    #[cfg(not(windows))]
+     fn status_lists_every_model_undownloaded_in_an_empty_data_dir() {
+         let scratch =
+             std::env::temp_dir().join(format!("concat-whisper-test-{}", std::process::id()));
